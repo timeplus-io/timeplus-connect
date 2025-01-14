@@ -1,7 +1,7 @@
 from typing import Union, Sequence, MutableSequence, Any
 from uuid import UUID as PYUUID
 
-from clickhouse_connect.datatypes.base import TypeDef, ClickHouseType, ArrayType, UnsupportedType
+from clickhouse_connect.datatypes.base import TypeDef, TimeplusType, ArrayType, UnsupportedType
 from clickhouse_connect.datatypes.registry import get_from_name
 from clickhouse_connect.driver.common import first_value
 from clickhouse_connect.driver.ctypes import data_conv
@@ -12,10 +12,11 @@ from clickhouse_connect.driver.types import ByteSource
 empty_uuid_b = bytes(b'\x00' * 16)
 
 
-class UUID(ClickHouseType):
+class UUID(TimeplusType):
     valid_formats = 'string', 'native'
     np_type = 'U36'
     byte_size = 16
+    base_type = ('uuid', )
 
     def python_null(self, ctx):
         return '' if self.read_format(ctx) == 'string' else PYUUID(int=0)
@@ -81,12 +82,13 @@ class Nothing(ArrayType):
         dest += bytes(0x30 for _ in range(len(column)))
 
 
-class SimpleAggregateFunction(ClickHouseType):
+class SimpleAggregateFunction(TimeplusType):
     _slots = ('element_type',)
+    base_type = ('simple_aggregate_function', )
 
     def __init__(self, type_def: TypeDef):
         super().__init__(type_def)
-        self.element_type: ClickHouseType = get_from_name(type_def.values[1])
+        self.element_type: TimeplusType = get_from_name(type_def.values[1])
         self._name_suffix = type_def.arg_str
         self.byte_size = self.element_type.byte_size
 
@@ -107,4 +109,4 @@ class SimpleAggregateFunction(ClickHouseType):
 
 
 class AggregateFunction(UnsupportedType):
-    pass
+    base_type = ('aggregate_function', )

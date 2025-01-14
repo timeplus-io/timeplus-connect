@@ -1,17 +1,17 @@
 from typing import Sequence, Any
 
-from clickhouse_connect.datatypes.base import ClickHouseType
+from clickhouse_connect.datatypes.base import TimeplusType
 from clickhouse_connect.driver.insert import InsertContext
 from clickhouse_connect.driver.query import QueryContext
 from clickhouse_connect.driver.types import ByteSource
 
-POINT_DATA_TYPE: ClickHouseType
-RING_DATA_TYPE: ClickHouseType
-POLYGON_DATA_TYPE: ClickHouseType
-MULTI_POLYGON_DATA_TYPE: ClickHouseType
+POINT_DATA_TYPE: TimeplusType
+RING_DATA_TYPE: TimeplusType
+POLYGON_DATA_TYPE: TimeplusType
+MULTI_POLYGON_DATA_TYPE: TimeplusType
 
 
-class Point(ClickHouseType):
+class Point(TimeplusType):
     def write_column(self, column: Sequence, dest: bytearray, ctx: InsertContext):
         return POINT_DATA_TYPE.write_column(column, dest, ctx)
 
@@ -22,7 +22,7 @@ class Point(ClickHouseType):
         return POINT_DATA_TYPE.read_column_data(source, num_rows, ctx, read_state)
 
 
-class Ring(ClickHouseType):
+class Ring(TimeplusType):
     def write_column(self, column: Sequence, dest: bytearray, ctx: InsertContext):
         return RING_DATA_TYPE.write_column(column, dest, ctx)
 
@@ -33,7 +33,7 @@ class Ring(ClickHouseType):
         return RING_DATA_TYPE.read_column_data(source, num_rows, ctx, read_state)
 
 
-class Polygon(ClickHouseType):
+class Polygon(TimeplusType):
     def write_column(self, column: Sequence, dest: bytearray, ctx: InsertContext):
         return POLYGON_DATA_TYPE.write_column(column, dest, ctx)
 
@@ -44,7 +44,7 @@ class Polygon(ClickHouseType):
         return POLYGON_DATA_TYPE.read_column_data(source, num_rows, ctx, read_state)
 
 
-class MultiPolygon(ClickHouseType):
+class MultiPolygon(TimeplusType):
     def write_column(self, column: Sequence, dest: bytearray, ctx: InsertContext):
         return MULTI_POLYGON_DATA_TYPE.write_column(column, dest, ctx)
 

@@ -15,7 +15,7 @@ class ChDDLCompiler(DDLCompiler):
 
     def visit_create_table(self, create, **_):
         table = create.element
-        text = f'CREATE TABLE {format_table(table)} ('
+        text = f'CREATE STREAM {format_table(table)} ('
         text += ', '.join([self.get_column_specification(c.element) for c in create.columns])
         return text + ') ' + table.engine.compile()
 

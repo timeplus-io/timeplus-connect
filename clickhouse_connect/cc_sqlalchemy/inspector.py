@@ -16,7 +16,7 @@ def get_engine(connection, table_name, schema=None):
         f"SELECT engine_full FROM system.tables WHERE database = '{schema}' and name = '{table_name}'")
     row = next(result_set, None)
     if not row:
-        raise NoResultFound(f'Table {schema}.{table_name} does not exist')
+        raise NoResultFound(f'STREAM {schema}.{table_name} does not exist')
     return build_engine(row.engine_full)
 
 
@@ -35,9 +35,9 @@ class ChInspector(Inspector):
 
     def get_columns(self, table_name, schema=None, **_kwargs):
         table_id = full_table(table_name, schema)
-        result_set = self.bind.execute(f'DESCRIBE TABLE {table_id}')
+        result_set = self.bind.execute(f'DESCRIBE {table_id}')
         if not result_set:
-            raise NoResultFound(f'Table {full_table} does not exist')
+            raise NoResultFound(f'STREAM {full_table} does not exist')
         columns = []
         for row in result_set:
             sqla_type = sqla_type_from_name(row.type.replace('\n', ''))

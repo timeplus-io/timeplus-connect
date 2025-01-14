@@ -14,7 +14,7 @@ from urllib3.response import HTTPResponse
 
 from clickhouse_connect import common
 from clickhouse_connect.datatypes import registry
-from clickhouse_connect.datatypes.base import ClickHouseType
+from clickhouse_connect.datatypes.base import TimeplusType
 from clickhouse_connect.driver.client import Client
 from clickhouse_connect.driver.common import dict_copy, coerce_bool, coerce_int, dict_add
 from clickhouse_connect.driver.compression import available_compression
@@ -31,7 +31,7 @@ from clickhouse_connect.driver.transform import NativeTransform
 
 logger = logging.getLogger(__name__)
 columns_only_re = re.compile(r'LIMIT 0\s*$', re.IGNORECASE)
-ex_header = 'X-ClickHouse-Exception-Code'
+ex_header = 'x-timeplus-exception-code'
 
 
 # pylint: disable=too-many-instance-attributes
@@ -93,8 +93,8 @@ class HttpClient(Client):
             if client_cert and (tls_mode is None or tls_mode == 'mutual'):
                 if not username:
                     raise ProgrammingError('username parameter is required for Mutual TLS authentication')
-                self.headers['X-ClickHouse-User'] = username
-                self.headers['X-ClickHouse-SSL-Certificate-Auth'] = 'on'
+                self.headers['x-timeplus-user'] = username
+                self.headers['x-timeplus-ssl-certificate-auth'] = 'on'
             # pylint: disable=too-many-boolean-expressions
             if not self.http and (server_host_name or ca_cert or client_cert or not verify or https_proxy):
                 options = {'verify': verify}
@@ -153,7 +153,6 @@ class HttpClient(Client):
             self.write_compression = compress
         else:
             compression = None
-
         super().__init__(database=database,
                          uri=self.url,
                          query_limit=query_limit,
@@ -206,7 +205,7 @@ class HttpClient(Client):
             # ClickHouse will respond with a JSON object of meta, data, and some other objects
             # We just grab the column names and column types from the metadata sub object
             names: List[str] = []
-            types: List[ClickHouseType] = []
+            types: List[TimeplusType] = []
             for col in json_result['meta']:
                 names.append(col['name'])
                 types.append(registry.get_from_name(col['type']))
@@ -234,7 +233,7 @@ class HttpClient(Client):
                                      fields=fields,
                                      server_wait=not context.streaming)
         byte_source = RespBuffCls(ResponseSource(response))  # pylint: disable=not-callable
-        context.set_response_tz(self._check_tz_change(response.headers.get('X-ClickHouse-Timezone')))
+        context.set_response_tz(self._check_tz_change(response.headers.get('x-timeplus-timezone')))
         query_result = self._transform.parse_response(byte_source, context)
         query_result.summary = self._summary(response)
         return query_result
@@ -304,12 +303,12 @@ class HttpClient(Client):
     @staticmethod
     def _summary(response: HTTPResponse):
         summary = {}
-        if 'X-ClickHouse-Summary' in response.headers:
+        if 'x-timeplus-summary' in response.headers:
             try:
-                summary = json.loads(response.headers['X-ClickHouse-Summary'])
+                summary = json.loads(response.headers['x-timeplus-summary'])
             except json.JSONDecodeError:
                 pass
-        summary['query_id'] = response.headers.get('X-ClickHouse-Query-Id', '')
+        summary['query_id'] = response.headers.get('x-timeplus-query-id', '')
         return summary
 
     def command(self,
@@ -374,13 +373,13 @@ class HttpClient(Client):
             err_str = f'HTTPDriver for {self.url} returned response code {response.status}'
             err_code = response.headers.get(ex_header)
             if err_code:
-                err_str = f'HTTPDriver for {self.url} received ClickHouse error code {err_code}'
+                err_str = f'HTTPDriver for {self.url} received Timeplus error code {err_code}'
             if err_content:
                 err_msg = common.format_error(err_content.decode(errors='backslashreplace'))
                 if err_msg.startswith('Code'):
                     err_str = f'{err_str}\n {err_msg}'
         else:
-            err_str = 'The ClickHouse server returned an error.'
+            err_str = 'The Timeplus server returned an error.'
 
         raise OperationalError(err_str) if retried else DatabaseError(err_str) from None
 
@@ -512,14 +511,16 @@ class HttpClient(Client):
 
     def ping(self):
         """
-        See BaseClient doc_string for this method
+        Proton hasn't HTTP handle for path /ping
         """
-        try:
-            response = self.http.request('GET', f'{self.url}/ping', timeout=3)
-            return 200 <= response.status < 300
-        except HTTPError:
-            logger.debug('ping failed', exc_info=True)
-            return False
+        return True
+        # proton hasn't HTTP handle for path /ping
+        # try:
+        #     response = self.http.request('GET', f'{self.url}/ping', timeout=3)
+        #     return 200 <= response.status < 300
+        # except HTTPError:
+        #     logger.debug('ping failed', exc_info=True)
+        #     return False
 
     def close_connections(self):
         self.http.clear()

@@ -7,16 +7,17 @@ from clickhouse_connect.driver.query import QueryContext
 from clickhouse_connect.driver.binding import quote_identifier
 from clickhouse_connect.driver.types import ByteSource
 from clickhouse_connect.json_impl import any_to_json
-from clickhouse_connect.datatypes.base import ClickHouseType, TypeDef
+from clickhouse_connect.datatypes.base import TimeplusType, TypeDef
 from clickhouse_connect.driver.common import must_swap, first_value
 from clickhouse_connect.datatypes.registry import get_from_name
 
 logger = logging.getLogger(__name__)
 
 
-class Array(ClickHouseType):
+class Array(TimeplusType):
     __slots__ = ('element_type', '_insert_name')
     python_type = list
+    base_type = ('array', )
 
     @property
     def insert_name(self):
@@ -26,7 +27,7 @@ class Array(ClickHouseType):
         super().__init__(type_def)
         self.element_type = get_from_name(type_def.values[0])
         self._name_suffix = f'({self.element_type.name})'
-        self._insert_name = f'Array({self.element_type.insert_name})'
+        self._insert_name = f'array({self.element_type.insert_name})'
 
     def read_column_prefix(self, source: ByteSource, ctx: QueryContext):
         return self.element_type.read_column_prefix(source, ctx)
@@ -90,10 +91,11 @@ class Array(ClickHouseType):
         final_type.write_column_data(column, dest, ctx)
 
 
-class Tuple(ClickHouseType):
+class Tuple(TimeplusType):
     _slots = 'element_names', 'element_types', '_insert_name'
     python_type = tuple
     valid_formats = 'tuple', 'dict', 'json', 'native'  # native is 'tuple' for unnamed tuples, and dict for named tuples
+    base_type = ('tuple', )
 
     @property
     def insert_name(self):
@@ -109,9 +111,9 @@ class Tuple(ClickHouseType):
             self._name_suffix = type_def.arg_str
         if self.element_names:
             self._insert_name = \
-                f"Tuple({', '.join(quote_identifier(k) + ' ' + v.insert_name for k, v in zip(type_def.keys, self.element_types))})"
+                f"tuple({', '.join(quote_identifier(k) + ' ' + v.insert_name for k, v in zip(type_def.keys, self.element_types))})"
         else:
-            self._insert_name = f"Tuple({', '.join(v.insert_name for v in self.element_types)})"
+            self._insert_name = f"tuple({', '.join(v.insert_name for v in self.element_types)})"
 
     def _data_size(self, sample: Collection) -> int:
         if len(sample) == 0:
@@ -168,9 +170,10 @@ class Tuple(ClickHouseType):
         return col
 
 
-class Map(ClickHouseType):
+class Map(TimeplusType):
     _slots = 'key_type', 'value_type', '_insert_name'
     python_type = dict
+    base_type = ('map', )
 
     @property
     def insert_name(self):
@@ -181,7 +184,7 @@ class Map(ClickHouseType):
         self.key_type = get_from_name(type_def.values[0])
         self.value_type = get_from_name(type_def.values[1])
         self._name_suffix = type_def.arg_str
-        self._insert_name = f'Map({self.key_type.insert_name}, {self.value_type.insert_name})'
+        self._insert_name = f'map({self.key_type.insert_name}, {self.value_type.insert_name})'
 
     def _data_size(self, sample: Collection) -> int:
         total = 0
@@ -233,14 +236,15 @@ class Map(ClickHouseType):
         self.value_type.write_column_data(values, dest, ctx)
 
 
-class Nested(ClickHouseType):
+class Nested(TimeplusType):
     __slots__ = 'tuple_array', 'element_names', 'element_types'
     python_type = Sequence[dict]
+    base_type = ('nested', )
 
     def __init__(self, type_def):
         super().__init__(type_def)
         self.element_names = type_def.keys
-        self.tuple_array = get_from_name(f"Array(Tuple({','.join(type_def.values)}))")
+        self.tuple_array = get_from_name(f"array(tuple({','.join(type_def.values)}))")
         self.element_types = self.tuple_array.element_type.element_types
         cols = [f'{x[0]} {x[1].name}' for x in zip(type_def.keys, self.element_types)]
         self._name_suffix = f"({', '.join(cols)})"

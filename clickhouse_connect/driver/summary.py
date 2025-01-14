@@ -26,8 +26,8 @@ class QuerySummary:
         data = []
         column_names = []
         column_types = []
-        str_type = get_from_name('String')
-        int_type = get_from_name('Int64')
+        str_type = get_from_name('string')
+        int_type = get_from_name('int64')
         for key, value in self.summary.items():
             column_names.append(key)
             if value.isnumeric():

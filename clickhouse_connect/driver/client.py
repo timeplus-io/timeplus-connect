@@ -11,7 +11,7 @@ from pytz.exceptions import UnknownTimeZoneError
 from clickhouse_connect import common
 from clickhouse_connect.common import version
 from clickhouse_connect.datatypes.registry import get_from_name
-from clickhouse_connect.datatypes.base import ClickHouseType
+from clickhouse_connect.datatypes.base import TimeplusType
 from clickhouse_connect.datatypes import dynamic as dynamic_module
 from clickhouse_connect.driver import tzutil
 from clickhouse_connect.driver.common import dict_copy, StreamContext, coerce_int, coerce_bool
@@ -60,7 +60,7 @@ class Client(ABC):
         """
         self.query_limit = coerce_int(query_limit)
         self.query_retries = coerce_int(query_retries)
-        if database and not database == '__default__':
+        if database and not database == 'default':
             self.database = database
         if show_clickhouse_errors is not None:
             self.show_clickhouse_errors = coerce_bool(show_clickhouse_errors)
@@ -207,7 +207,7 @@ class Client(ABC):
         """
         if query and query.lower().strip().startswith('select __connect_version__'):
             return QueryResult([[f'ClickHouse Connect v.{version()}  ⓒ ClickHouse Inc.']], None,
-                               ('connect_version',), (get_from_name('String'),))
+                               ('connect_version',), (get_from_name('string'),))
         kwargs = locals().copy()
         del kwargs['self']
         query_context = self.create_query_context(**kwargs)
@@ -589,7 +589,7 @@ class Client(ABC):
                data: Sequence[Sequence[Any]] = None,
                column_names: Union[str, Iterable[str]] = '*',
                database: Optional[str] = None,
-               column_types: Sequence[ClickHouseType] = None,
+               column_types: Sequence[TimeplusType] = None,
                column_type_names: Sequence[str] = None,
                column_oriented: bool = False,
                settings: Optional[Dict[str, Any]] = None,
@@ -633,7 +633,7 @@ class Client(ABC):
                   database: Optional[str] = None,
                   settings: Optional[Dict] = None,
                   column_names: Optional[Sequence[str]] = None,
-                  column_types: Sequence[ClickHouseType] = None,
+                  column_types: Sequence[TimeplusType] = None,
                   column_type_names: Sequence[str] = None,
                   context: InsertContext = None) -> QuerySummary:
         """
@@ -686,7 +686,7 @@ class Client(ABC):
                               table: str,
                               column_names: Optional[Union[str, Sequence[str]]] = None,
                               database: Optional[str] = None,
-                              column_types: Sequence[ClickHouseType] = None,
+                              column_types: Sequence[TimeplusType] = None,
                               column_type_names: Sequence[str] = None,
                               column_oriented: bool = False,
                               settings: Optional[Dict[str, Any]] = None,
@@ -698,7 +698,7 @@ class Client(ABC):
         :param column_names: Optional ordered list of column names.  If not set, all columns ('*') will be assumed
           in the order specified by the table definition
         :param database: Target database -- will use client default database if not specified
-        :param column_types: ClickHouse column types.  Optional  Sequence of ClickHouseType objects.  If neither column
+        :param column_types: ClickHouse column types.  Optional  Sequence of TimeplusType objects.  If neither column
            types nor column type names are set, actual column types will be retrieved from the server.
         :param column_type_names: ClickHouse column type names.  Specified column types by name string
         :param column_oriented: If true the data is already "pivoted" in column form
@@ -714,7 +714,7 @@ class Client(ABC):
                 full_table = quote_identifier(table)
         column_defs = []
         if column_types is None and column_type_names is None:
-            describe_result = self.query(f'DESCRIBE TABLE {full_table}')
+            describe_result = self.query(f'DESCRIBE {full_table}')
             column_defs = [ColumnDef(**row) for row in describe_result.named_results()
                            if row['default_type'] not in ('ALIAS', 'MATERIALIZED')]
         if column_names is None or isinstance(column_names, str) and column_names == '*':

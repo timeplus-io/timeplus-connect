@@ -77,6 +77,9 @@ class TableEngine(SchemaEventTarget, Visitable):
     def _set_parent(self, parent, **_kwargs):
         parent.engine = self
 
+class Stream(TableEngine):
+    arg_names = ['replication_factor', 'shards', 'shard_by_expr']
+
 
 class Memory(TableEngine):
     pass

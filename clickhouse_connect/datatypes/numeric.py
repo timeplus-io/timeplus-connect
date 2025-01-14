@@ -3,7 +3,7 @@ from typing import Union, Type, Sequence, MutableSequence, Any
 
 from math import nan, isnan, isinf
 
-from clickhouse_connect.datatypes.base import TypeDef, ArrayType, ClickHouseType
+from clickhouse_connect.datatypes.base import TypeDef, ArrayType, TimeplusType
 from clickhouse_connect.driver.common import array_type, write_array, decimal_size, decimal_prec, first_value
 from clickhouse_connect.driver.ctypes import numpy_conv, data_conv
 from clickhouse_connect.driver.insert import InsertContext
@@ -13,6 +13,11 @@ from clickhouse_connect.driver.types import ByteSource
 
 
 class IntBase(ArrayType, registered=False):
+    pd_type = None
+    def __init_subclass__(cls,registered: bool = True):
+        cls.pd_type = cls.__name__
+        super().__init_subclass__(registered)
+
     def _write_column_binary(self, column: Union[Sequence, MutableSequence], dest: bytearray, ctx: InsertContext):
         if len(column) == 0:
             return
@@ -34,36 +39,43 @@ class IntBase(ArrayType, registered=False):
 class Int8(IntBase):
     _array_type = 'b'
     np_type = 'b'
+    base_type = ('int8', )
 
 
 class UInt8(IntBase):
     _array_type = 'B'
     np_type = 'B'
+    base_type = ('uint8', )
 
 
 class Int16(IntBase):
     _array_type = 'h'
     np_type = '<i2'
+    base_type = ('int16', )
 
 
 class UInt16(IntBase):
     _array_type = 'H'
     np_type = '<u2'
+    base_type = ('uint16', )
 
 
 class Int32(IntBase):
     _array_type = 'i'
     np_type = '<i4'
+    base_type = ('int32', 'int')
 
 
 class UInt32(IntBase):
     _array_type = 'I'
     np_type = '<u4'
+    base_type = ('uint32', 'uint')
 
 
 class Int64(IntBase):
     _array_type = 'q'
     np_type = '<i8'
+    base_type = ('int64', )
 
 
 class UInt64(IntBase):
@@ -71,6 +83,7 @@ class UInt64(IntBase):
     _array_type = 'Q'
     np_type = '<u8'
     python_type = int
+    base_type = ('uint64', )
 
     def _read_column_binary(self, source: ByteSource, num_rows: int, ctx: QueryContext, _read_state: Any):
         fmt = self.read_format(ctx)
@@ -95,9 +108,14 @@ class UInt64(IntBase):
         return column
 
 
-class BigInt(ClickHouseType, registered=False):
+class BigInt(TimeplusType, registered=False):
     _signed = True
     valid_formats = 'string', 'native'
+
+    def __init_subclass__(cls,registered: bool = True):
+        cls.pd_type = cls.__name__
+        super().__init_subclass__(registered)
+
 
     def _read_column_binary(self, source: ByteSource, num_rows: int, ctx: QueryContext, _read_state: Any):
         signed = self._signed
@@ -147,26 +165,30 @@ class BigInt(ClickHouseType, registered=False):
 class Int128(BigInt):
     byte_size = 16
     _signed = True
+    base_type = ('int128', )
 
 
 class UInt128(BigInt):
     byte_size = 16
     _signed = False
+    base_type = ('uint128', )
 
 
 class Int256(BigInt):
     byte_size = 32
     _signed = True
-
+    base_type = ('int256', )
 
 class UInt256(BigInt):
     byte_size = 32
     _signed = False
+    base_type = ('uint256', )
 
 
 class Float(ArrayType, registered=False):
     _array_type = 'f'
     python_type = float
+    base_type = ('float', )
 
     def _finalize_column(self, column: Sequence, ctx: QueryContext) -> Sequence:
         if self.read_format(ctx) == 'string':
@@ -200,17 +222,20 @@ class Float(ArrayType, registered=False):
 
 class Float32(Float):
     np_type = '<f4'
+    base_type = ('float32', )
 
 
 class Float64(Float):
     _array_type = 'd'
     np_type = '<f8'
+    base_type = ('float64', )
 
 
-class Bool(ClickHouseType):
+class Bool(TimeplusType):
     np_type = '?'
     python_type = bool
     byte_size = 1
+    base_type = ('bool', )
 
     def _read_column_binary(self, source: ByteSource, num_rows: int, _ctx: QueryContext, _read_state: Any):
         column = source.read_bytes(num_rows)
@@ -229,11 +254,12 @@ class Boolean(Bool):
     pass
 
 
-class Enum(ClickHouseType):
+class Enum(TimeplusType):
     __slots__ = '_name_map', '_int_map'
     _array_type = 'b'
     valid_formats = 'native', 'int'
     python_type = str
+    base_type = ('enum', )
 
     def __init__(self, type_def: TypeDef):
         super().__init__(type_def)
@@ -264,17 +290,20 @@ class Enum(ClickHouseType):
 class Enum8(Enum):
     _array_type = 'b'
     byte_size = 1
+    base_type = ('enum8', )
 
 
 class Enum16(Enum):
     _array_type = 'h'
     byte_size = 2
+    base_type = ('enum16', )
 
 
-class Decimal(ClickHouseType):
+class Decimal(TimeplusType):
     __slots__ = 'prec', 'scale', '_mult', '_zeros', 'byte_size', '_array_type'
     python_type = decimal.Decimal
     dec_size = 0
+    base_type = ('decimal', 'Decimal')
 
     @classmethod
     def build(cls: Type['Decimal'], type_def: TypeDef):
@@ -375,15 +404,19 @@ class BigDecimal(Decimal, registered=False):
 
 class Decimal32(Decimal):
     dec_size = 32
+    base_type = ('decimal32', 'Decimal32')
 
 
 class Decimal64(Decimal):
     dec_size = 64
+    base_type = ('decimal64', 'Decimal64')
 
 
 class Decimal128(BigDecimal):
     dec_size = 128
+    base_type = ('decimal128', 'Decimal128')
 
 
 class Decimal256(BigDecimal):
     dec_size = 256
+    base_type = ('decimal256', 'Decimal256')

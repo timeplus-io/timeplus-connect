@@ -10,7 +10,7 @@ from clickhouse_connect.driver.options import np, pd, pd_time_test
 from clickhouse_connect.driver.exceptions import ProgrammingError, DataError
 
 if TYPE_CHECKING:
-    from clickhouse_connect.datatypes.base import ClickHouseType
+    from clickhouse_connect.datatypes.base import TimeplusType
 
 logger = logging.getLogger(__name__)
 DEFAULT_BLOCK_BYTES = 1 << 21   # Try to generate blocks between 1MB and 2MB in raw size
@@ -21,7 +21,7 @@ class InsertBlock(NamedTuple):
     column_count: int
     row_count: int
     column_names: Iterable[str]
-    column_types: Iterable['ClickHouseType']
+    column_types: Iterable['TimeplusType']
     column_data: Iterable[Sequence[Any]]
 
 
@@ -35,7 +35,7 @@ class InsertContext(BaseQueryContext):
     def __init__(self,
                  table: str,
                  column_names: Sequence[str],
-                 column_types: Sequence['ClickHouseType'],
+                 column_types: Sequence['TimeplusType'],
                  data: Any = None,
                  column_oriented: Optional[bool] = None,
                  settings: Optional[Dict[str, Any]] = None,
@@ -150,11 +150,12 @@ class InsertContext(BaseQueryContext):
             df_col = df[df_col_name]
             d_type = str(df_col.dtype)
             if ch_type.python_type == int:
-                if 'float' in d_type:
-                    df_col = df_col.round().astype(ch_type.base_type, copy=False)
-                else:
-                    df_col = df_col.astype(ch_type.base_type, copy=False)
-            elif 'datetime' in ch_type.np_type and (pd_time_test(df_col) or 'datetime64[ns' in d_type):
+                if d_type_kind == 'f':
+                    df_col = df_col.round().astype(ch_type.pd_type , copy=False)
+                elif d_type_kind in ('i', 'u') and not df_col.hasnans:
+                    data.append(df_col.to_list())
+                    continue
+            elif 'datetime' in ch_type.np_type and (pd_time_test(df_col) or 'datetime64[ns' in str(df_col.dtype)):
                 div = ch_type.nano_divisor
                 data.append([None if pd.isnull(x) else x.value // div for x in df_col])
                 self.column_formats[col_name] = 'int'
@@ -164,7 +165,7 @@ class InsertContext(BaseQueryContext):
                     #  This is ugly, but the multiple replaces seem required as a result of this bug:
                     #  https://github.com/pandas-dev/pandas/issues/29024
                     df_col = df_col.replace({pd.NaT: None}).replace({np.nan: None})
-                elif 'Float' in ch_type.base_type:
+                elif any((t in ch_type.base_type) for t in ['float32', 'float64', 'float']):
                     data.append([None if pd.isnull(x) else x for x in df_col])
                     continue
                 else:

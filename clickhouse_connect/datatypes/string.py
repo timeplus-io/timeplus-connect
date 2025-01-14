@@ -3,7 +3,7 @@ from typing import Sequence, MutableSequence, Union, Collection, Any
 from clickhouse_connect.driver.common import first_value
 from clickhouse_connect.driver.ctypes import data_conv
 
-from clickhouse_connect.datatypes.base import ClickHouseType, TypeDef
+from clickhouse_connect.datatypes.base import TimeplusType, TypeDef
 from clickhouse_connect.driver.errors import handle_error
 from clickhouse_connect.driver.insert import InsertContext
 from clickhouse_connect.driver.query import QueryContext
@@ -11,8 +11,9 @@ from clickhouse_connect.driver.types import ByteSource
 from clickhouse_connect.driver.options import np, pd
 
 
-class String(ClickHouseType):
+class String(TimeplusType):
     valid_formats = 'bytes', 'native'
+    base_type = ('string', )
 
     def _active_encoding(self, ctx):
         if self.read_format(ctx) == 'bytes':
@@ -57,8 +58,9 @@ class String(ClickHouseType):
         return ''
 
 
-class FixedString(ClickHouseType):
+class FixedString(TimeplusType):
     valid_formats = 'string', 'native'
+    base_type = ('fixed_string', )
 
     def __init__(self, type_def: TypeDef):
         super().__init__(type_def)
@@ -104,7 +106,7 @@ class FixedString(ClickHouseType):
                         except UnicodeEncodeError:
                             b = empty
                         if len(b) > sz:
-                            raise ctx.data_error(f'UTF-8 encoded FixedString value {b.hex(" ")} exceeds column size {sz}')
+                            raise ctx.data_error(f'UTF-8 encoded fixed_string value {b.hex(" ")} exceeds column size {sz}')
                         ext(b)
                         ext(empty[:sz - len(b)])
             else:
@@ -114,7 +116,7 @@ class FixedString(ClickHouseType):
                     except UnicodeEncodeError:
                         b = empty
                     if len(b) > sz:
-                        raise ctx.data_error(f'UTF-8 encoded FixedString value {b.hex(" ")} exceeds column size {sz}')
+                        raise ctx.data_error(f'UTF-8 encoded fixed_string value {b.hex(" ")} exceeds column size {sz}')
                     ext(b)
                     ext(empty[:sz - len(b)])
         elif self.nullable:

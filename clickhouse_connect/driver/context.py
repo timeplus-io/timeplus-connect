@@ -48,13 +48,15 @@ class BaseQueryContext:
         self._active_col_fmt = self.col_simple_formats.get(name)
         self._active_col_type_fmts = self.col_type_formats.get(name, _empty_map)
 
-    def active_fmt(self, ch_type):
+    def active_fmt(self, tp_type):
         if self._active_col_fmt:
             return self._active_col_fmt
         for type_pattern, fmt in self._active_col_type_fmts.items():
-            if type_pattern.match(ch_type):
-                return fmt
+            for type_name in tp_type:
+                if type_pattern.match(type_name):
+                    return fmt
         for type_pattern, fmt in self.type_formats.items():
-            if type_pattern.match(ch_type):
-                return fmt
+            for type_name in tp_type:
+                if type_pattern.match(type_name):
+                    return fmt
         return None

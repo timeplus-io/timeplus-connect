@@ -1,6 +1,6 @@
 from typing import NamedTuple, Sequence
 
-from clickhouse_connect.datatypes.base import ClickHouseType
+from clickhouse_connect.datatypes.base import TimeplusType
 
 
 class TableColumnDef(NamedTuple):
@@ -8,7 +8,7 @@ class TableColumnDef(NamedTuple):
     Simplified ClickHouse Table Column definition for DDL
     """
     name: str
-    ch_type: ClickHouseType
+    ch_type: TimeplusType
     expr_type: str = None
     expr: str = None
 
@@ -21,7 +21,7 @@ class TableColumnDef(NamedTuple):
 
 
 def create_table(table_name: str, columns: Sequence[TableColumnDef], engine: str, engine_params: dict):
-    stmt = f"CREATE TABLE {table_name} ({', '.join(col.col_expr for col in columns)}) ENGINE {engine} "
+    stmt = f"CREATE STREAM {table_name} ({', '.join(col.col_expr for col in columns)}) ENGINE {engine} "
     if engine_params:
         for key, value in engine_params.items():
             stmt += f' {key} {value}'

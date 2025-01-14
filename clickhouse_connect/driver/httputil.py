@@ -252,6 +252,8 @@ class ResponseSource:
                 if chunk:
                     yield chunk
 
+
+
         self.gen = buffered()
 
     def close(self):

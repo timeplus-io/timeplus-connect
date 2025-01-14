@@ -21,7 +21,7 @@ ch_write_formats = {}
 
 class TypeDef(NamedTuple):
     """
-    Immutable tuple that contains all additional information needed to construct a particular ClickHouseType
+    Immutable tuple that contains all additional information needed to construct a particular TimeplusType
     """
     wrappers: tuple = ()
     keys: tuple = ()
@@ -32,9 +32,9 @@ class TypeDef(NamedTuple):
         return f"({', '.join(str(v) for v in self.values)})" if self.values else ''
 
 
-class ClickHouseType(ABC):
+class TimeplusType(ABC):
     """
-    Base class for all ClickHouseType objects.
+    Base class for all TimeplusType objects.
     """
     __slots__ = 'nullable', 'low_card', 'wrappers', 'type_def', '__dict__'
     _name_suffix = ''
@@ -45,19 +45,20 @@ class ClickHouseType(ABC):
     valid_formats = 'native'
 
     python_type = None
+    pd_type = None
     base_type = None
 
     def __init_subclass__(cls, registered: bool = True):
         if registered:
-            cls.base_type = cls.__name__
-            type_map[cls.base_type] = cls
+            for type_name in (cls.base_type or ()):
+                type_map[type_name] = cls
 
     @classmethod
-    def build(cls: Type['ClickHouseType'], type_def: TypeDef):
+    def build(cls: Type['TimeplusType'], type_def: TypeDef):
         return cls(type_def)
 
     @classmethod
-    def _active_format(cls, fmt_map: Dict[Type['ClickHouseType'], str], ctx: BaseQueryContext):
+    def _active_format(cls, fmt_map: Dict[Type['TimeplusType'], str], ctx: BaseQueryContext):
         ctx_fmt = ctx.active_fmt(cls.base_type)
         if ctx_fmt:
             return ctx_fmt
@@ -73,13 +74,13 @@ class ClickHouseType(ABC):
 
     def __init__(self, type_def: TypeDef):
         """
-        Base class constructor that sets Nullable and LowCardinality wrappers
-        :param type_def:  ClickHouseType base configuration parameters
+        Base class constructor that sets nullable and low_cardinality wrappers
+        :param type_def:  TimeplusType base configuration parameters
         """
         self.type_def = type_def
         self.wrappers = type_def.wrappers
-        self.low_card = 'LowCardinality' in self.wrappers
-        self.nullable = 'Nullable' in self.wrappers
+        self.low_card = 'low_cardinality' in self.wrappers
+        self.nullable = 'nullable' in self.wrappers
 
     def __eq__(self, other):
         return other.__class__ == self.__class__ and self.type_def == other.type_def
@@ -89,7 +90,7 @@ class ClickHouseType(ABC):
 
     @property
     def name(self):
-        name = f'{self.base_type}{self._name_suffix}'
+        name = f'{self.base_type[0]}{self._name_suffix}'
         for wrapper in reversed(self.wrappers):
             name = f'{wrapper}({name})'
         return name
@@ -142,7 +143,7 @@ class ClickHouseType(ABC):
 
     def read_column(self, source: ByteSource, num_rows: int, ctx: QueryContext) -> Sequence:
         """
-        Wrapping read method for all ClickHouseType data types.  Only overridden for container classes so that
+        Wrapping read method for all TimeplusType data types.  Only overridden for container classes so that
          the LowCardinality version is read for the contained types
         :param source: Native protocol binary read buffer
         :param num_rows: Number of rows expected in the column
@@ -154,7 +155,7 @@ class ClickHouseType(ABC):
 
     def read_column_data(self, source: ByteSource, num_rows: int, ctx: QueryContext, read_state: Any) -> Sequence:
         """
-        Public read method for all ClickHouseType data type columns
+        Public read method for all TimeplusType data type columns
         :param source: Native protocol binary read buffer
         :param num_rows: Number of rows expected in the column
         :param ctx: QueryContext for query specific settings
@@ -184,7 +185,7 @@ class ClickHouseType(ABC):
                             _num_rows: int, _ctx: QueryContext,
                             _read_state: Any) -> Union[Sequence, MutableSequence]:
         """
-        Lowest level read method for ClickHouseType native data columns
+        Lowest level read method for TimeplusType native data columns
         :param _source: Native protocol binary read buffer
         :param _num_rows: Expected number of rows in the column
         :return: Decoded column plus updated read buffer
@@ -196,7 +197,7 @@ class ClickHouseType(ABC):
 
     def _write_column_binary(self, column: Union[Sequence, MutableSequence], dest: bytearray, ctx: InsertContext):
         """
-        Lowest level write method for ClickHouseType data columns
+        Lowest level write method for TimeplusType data columns
         :param column: Python data column
         :param dest: Native protocol write buffer
         :param ctx: Insert Context with insert specific settings
@@ -204,7 +205,7 @@ class ClickHouseType(ABC):
 
     def write_column(self, column: Sequence, dest: bytearray, ctx: InsertContext):
         """
-        Wrapping write method for ClickHouseTypes.  Only overridden for container types that so that
+        Wrapping write method for TimeplusTypes.  Only overridden for container types that so that
         the write_native_prefix is done at the right time for contained types
         :param column: Column/sequence of Python values to write
         :param dest: Native binary write buffer
@@ -215,7 +216,7 @@ class ClickHouseType(ABC):
 
     def write_column_data(self, column: Sequence, dest: bytearray, ctx: InsertContext):
         """
-        Public native write method for ClickHouseTypes.  Delegates the actual write to either the LowCardinality
+        Public native write method for TimeplusTypes.  Delegates the actual write to either the LowCardinality
         write method or the _write_native_binary method of the type
         :param column: Sequence of Python data
         :param dest: Native binary write buffer
@@ -293,15 +294,15 @@ class ClickHouseType(ABC):
 
 
 EMPTY_TYPE_DEF = TypeDef()
-NULLABLE_TYPE_DEF = TypeDef(wrappers=('Nullable',))
-LC_TYPE_DEF = TypeDef(wrappers=('LowCardinality',))
-type_map: Dict[str, Type[ClickHouseType]] = {}
+NULLABLE_TYPE_DEF = TypeDef(wrappers=('nullable',))
+LC_TYPE_DEF = TypeDef(wrappers=('low_cardinality',))
+type_map: Dict[str, Type[TimeplusType]] = {}
 
 
-class ArrayType(ClickHouseType, ABC, registered=False):
+class ArrayType(TimeplusType, ABC, registered=False):
     """
-    ClickHouse type that utilizes Python or Numpy arrays for fast reads and writes of binary data.
-    arrays can only be used for ClickHouse types that can be translated into UInt64 (and smaller) integers
+    Timeplus type that utilizes Python or Numpy arrays for fast reads and writes of binary data.
+    arrays can only be used for Timeplus types that can be translated into UInt64 (and smaller) integers
     or Float32/64
     """
     _signed = True
@@ -335,7 +336,7 @@ class ArrayType(ClickHouseType, ABC, registered=False):
         if self.read_format(ctx) == 'string':
             return [str(x) for x in column]
         if ctx.use_extended_dtypes and self.nullable:
-            return pd.array(column, dtype=self.base_type)
+            return pd.array(column, dtype=(self.pd_type if self.pd_type else self.base_type[0]))
         if ctx.use_numpy and self.nullable and (not ctx.use_none):
             return np.array(column, dtype=self.np_type)
         return column
@@ -353,7 +354,7 @@ class ArrayType(ClickHouseType, ABC, registered=False):
         return 0
 
 
-class UnsupportedType(ClickHouseType, ABC, registered=False):
+class UnsupportedType(TimeplusType, ABC, registered=False):
     """
     Base class for ClickHouse types that can't be serialized/deserialized into Python types.
     Mostly useful just for DDL statements

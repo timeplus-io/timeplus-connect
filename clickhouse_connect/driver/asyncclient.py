@@ -11,7 +11,7 @@ from clickhouse_connect.driver.httpclient import HttpClient
 from clickhouse_connect.driver.external import ExternalData
 from clickhouse_connect.driver.query import QueryContext, QueryResult
 from clickhouse_connect.driver.summary import QuerySummary
-from clickhouse_connect.datatypes.base import ClickHouseType
+from clickhouse_connect.datatypes.base import TimeplusType
 from clickhouse_connect.driver.insert import InsertContext
 
 
@@ -512,7 +512,7 @@ class AsyncClient:
                      data: Sequence[Sequence[Any]] = None,
                      column_names: Union[str, Iterable[str]] = '*',
                      database: Optional[str] = None,
-                     column_types: Sequence[ClickHouseType] = None,
+                     column_types: Sequence[TimeplusType] = None,
                      column_type_names: Sequence[str] = None,
                      column_oriented: bool = False,
                      settings: Optional[Dict[str, Any]] = None,
@@ -550,7 +550,7 @@ class AsyncClient:
                         database: Optional[str] = None,
                         settings: Optional[Dict] = None,
                         column_names: Optional[Sequence[str]] = None,
-                        column_types: Sequence[ClickHouseType] = None,
+                        column_types: Sequence[TimeplusType] = None,
                         column_type_names: Sequence[str] = None,
                         context: InsertContext = None) -> QuerySummary:
         """
@@ -603,7 +603,7 @@ class AsyncClient:
                                     table: str,
                                     column_names: Optional[Union[str, Sequence[str]]] = None,
                                     database: Optional[str] = None,
-                                    column_types: Sequence[ClickHouseType] = None,
+                                    column_types: Sequence[TimeplusType] = None,
                                     column_type_names: Sequence[str] = None,
                                     column_oriented: bool = False,
                                     settings: Optional[Dict[str, Any]] = None,
@@ -615,7 +615,7 @@ class AsyncClient:
         :param column_names: Optional ordered list of column names.  If not set, all columns ('*') will be assumed
           in the order specified by the table definition
         :param database: Target database -- will use client default database if not specified
-        :param column_types: ClickHouse column types.  Optional  Sequence of ClickHouseType objects.  If neither column
+        :param column_types: ClickHouse column types.  Optional  Sequence of TimeplusType objects.  If neither column
            types nor column type names are set, actual column types will be retrieved from the server.
         :param column_type_names: ClickHouse column type names.  Specified column types by name string
         :param column_oriented: If true the data is already "pivoted" in column form

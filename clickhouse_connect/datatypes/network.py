@@ -2,7 +2,7 @@ import socket
 from ipaddress import IPv4Address, IPv6Address
 from typing import Union, MutableSequence, Sequence, Any
 
-from clickhouse_connect.datatypes.base import ClickHouseType
+from clickhouse_connect.datatypes.base import TimeplusType
 from clickhouse_connect.driver.common import write_array, int_size, first_value
 from clickhouse_connect.driver.insert import InsertContext
 from clickhouse_connect.driver.query import QueryContext
@@ -14,11 +14,12 @@ V6_NULL = bytes(b'\x00' * 16)
 
 
 # pylint: disable=protected-access
-class IPv4(ClickHouseType):
+class IPv4(TimeplusType):
     _array_type = 'L' if int_size == 2 else 'I'
     valid_formats = 'string', 'native', 'int'
     python_type = IPv4Address
     byte_size = 4
+    base_type = ('ipv4', )
 
     def _read_column_binary(self, source: ByteSource, num_rows: int, ctx: QueryContext, _read_state: Any):
         if self.read_format(ctx) == 'int':
@@ -53,10 +54,11 @@ class IPv4(ClickHouseType):
 
 
 # pylint: disable=protected-access
-class IPv6(ClickHouseType):
+class IPv6(TimeplusType):
     valid_formats = 'string', 'native'
     python_type = IPv6Address
     byte_size = 16
+    base_type = ('ipv6', )
 
     def _read_column_binary(self, source: ByteSource, num_rows: int, ctx: QueryContext, _read_state: Any):
         if self.read_format(ctx) == 'string':

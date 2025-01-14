@@ -65,7 +65,7 @@ def parse_callable(expr) -> Tuple[str, Tuple[Union[str, int], ...], str]:
                     continue
                 if char == ')':
                     break
-            if char == "'" and (not value or 'Enum' in value):
+            if char == "'" and (not value or 'enum' in value):
                 in_str = True
             elif char == '(':
                 level += 1
@@ -156,7 +156,7 @@ def parse_columns(expr: str):
                 elif char == ')':
                     columns.append(label)
                     break
-            if char in ("'", '`') and (not label or 'Enum' in label):
+            if char in ("'", '`') and (not label or 'enum' in label):
                 quote = char
             elif char == '(':
                 level += 1

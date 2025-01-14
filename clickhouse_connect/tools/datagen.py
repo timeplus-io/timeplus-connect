@@ -8,7 +8,7 @@ from datetime import date, datetime, timedelta, tzinfo
 
 import pytz
 
-from clickhouse_connect.datatypes.base import ClickHouseType
+from clickhouse_connect.datatypes.base import TimeplusType
 from clickhouse_connect.datatypes.container import Array, Tuple, Map, Nested
 from clickhouse_connect.datatypes.network import IPv4, IPv6
 from clickhouse_connect.datatypes.numeric import BigInt, Float32, Float64, Enum, Bool, Boolean, Decimal
@@ -35,13 +35,13 @@ class RandomValueDef(NamedTuple):
     ascii_only: bool = False
 
 
-def random_col_data(ch_type: Union[str, ClickHouseType], cnt: int, col_def: RandomValueDef = RandomValueDef()):
+def random_col_data(ch_type: Union[str, TimeplusType], cnt: int, col_def: RandomValueDef = RandomValueDef()):
     """
     Generate a column of random data for insert tests
-    :param ch_type: ClickHouseType or ClickHouse type name
+    :param ch_type: TimeplusType or ClickHouse type name
     :param cnt: Number of values to generate
     :param col_def: Parameters to use for random data generation
-    :return: A tuple of length cnt of random Python data values of the requested ClickHouseType
+    :return: A tuple of length cnt of random Python data values of the requested TimeplusType
     """
     if isinstance(ch_type, str):
         ch_type = get_from_name(ch_type)
@@ -53,10 +53,10 @@ def random_col_data(ch_type: Union[str, ClickHouseType], cnt: int, col_def: Rand
 
 
 # pylint: disable=too-many-return-statements,too-many-branches,protected-access
-def random_value_gen(ch_type: ClickHouseType, col_def: RandomValueDef):
+def random_value_gen(ch_type: TimeplusType, col_def: RandomValueDef):
     """
-    Returns a generator function of random values of the requested ClickHouseType
-    :param ch_type: ClickHouseType to generate
+    Returns a generator function of random values of the requested TimeplusType
+    :param ch_type: TimeplusType to generate
     :param col_def: Parameters for the generated values
     :return: Function or lambda that will return a random value of the requested type
     """
@@ -123,7 +123,7 @@ def random_decimal(prec: int, scale: int):
     return PyDecimal(f'{sign}{digits[:-scale]}.{digits[-scale:]}')
 
 
-def random_tuple(element_types: Sequence[ClickHouseType], col_def):
+def random_tuple(element_types: Sequence[TimeplusType], col_def):
     return tuple(random_value_gen(x, col_def)() for x in element_types)
 
 
@@ -184,7 +184,7 @@ def random_ipv6():
     return IPv4Address(int(random() * 2 ** 32))
 
 
-def random_nested(keys: Sequence[str], types: Sequence[ClickHouseType], col_def: RandomValueDef):
+def random_nested(keys: Sequence[str], types: Sequence[TimeplusType], col_def: RandomValueDef):
     sz = int(random() * col_def.arr_len) // 2
     row = []
     for _ in range(sz):
@@ -195,7 +195,7 @@ def random_nested(keys: Sequence[str], types: Sequence[ClickHouseType], col_def:
     return row
 
 
-gen_map: Dict[Type[ClickHouseType], Callable] = {
+gen_map: Dict[Type[TimeplusType], Callable] = {
     Float64: random_float,
     Float32: random_float32,
     Date: lambda: epoch_date + timedelta(days=int(random() * 65536)),

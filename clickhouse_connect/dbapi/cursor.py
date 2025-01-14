@@ -13,8 +13,8 @@ from clickhouse_connect.driver.query import remove_sql_comments
 logger = logging.getLogger(__name__)
 
 insert_re = re.compile(r'^\s*INSERT\s+INTO\s+(.*$)', re.IGNORECASE)
-str_type = get_from_name('String')
-int_type = get_from_name('Int32')
+str_type = get_from_name('string')
+int_type = get_from_name('int32')
 
 
 # pylint: disable=too-many-instance-attributes

@@ -3,7 +3,7 @@ import pytz
 from datetime import date, datetime, tzinfo
 from typing import Union, Sequence, MutableSequence, Any
 
-from clickhouse_connect.datatypes.base import TypeDef, ClickHouseType
+from clickhouse_connect.datatypes.base import TypeDef, TimeplusType
 from clickhouse_connect.driver.common import write_array, np_date_types, int_size, first_value
 from clickhouse_connect.driver.exceptions import ProgrammingError
 from clickhouse_connect.driver.ctypes import data_conv, numpy_conv
@@ -16,13 +16,14 @@ epoch_start_date = date(1970, 1, 1)
 epoch_start_datetime = datetime(1970, 1, 1)
 
 
-class Date(ClickHouseType):
+class Date(TimeplusType):
     _array_type = 'H'
     np_type = 'datetime64[D]'
     nano_divisor = 86400 * 1000000000
     valid_formats = 'native', 'int'
     python_type = date
     byte_size = 2
+    base_type = ('Date', 'date')
 
     def _read_column_binary(self, source: ByteSource, num_rows: int, ctx: QueryContext, _read_state:Any):
         if self.read_format(ctx) == 'int':
@@ -70,6 +71,7 @@ class Date(ClickHouseType):
 class Date32(Date):
     byte_size = 4
     _array_type = 'l' if int_size == 2 else 'i'
+    base_type = ('Date32', 'date32')
 
     def _read_column_binary(self, source: ByteSource, num_rows: int, ctx: QueryContext, _read_state: Any):
         if ctx.use_numpy:
@@ -79,7 +81,7 @@ class Date32(Date):
         return data_conv.read_date32_col(source, num_rows)
 
 
-class DateTimeBase(ClickHouseType, registered=False):
+class DateTimeBase(TimeplusType, registered=False):
     __slots__ = ('tzinfo',)
     valid_formats = 'native', 'int'
     python_type = datetime
@@ -102,6 +104,7 @@ class DateTime(DateTimeBase):
     np_type = 'datetime64[s]'
     nano_divisor = 1000000000
     byte_size = 4
+    base_type = ('DateTime', 'DateTime32', 'datetime', 'datetime32')
 
     def __init__(self, type_def: TypeDef):
         super().__init__(type_def)
@@ -138,6 +141,7 @@ class DateTime(DateTimeBase):
 class DateTime64(DateTimeBase):
     __slots__ = 'scale', 'prec', 'unit'
     byte_size = 8
+    base_type = ('DateTime64', 'datetime64')
 
     def __init__(self, type_def: TypeDef):
         super().__init__(type_def)

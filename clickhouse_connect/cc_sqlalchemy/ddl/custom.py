@@ -16,7 +16,7 @@ class CreateDatabase(DDL):
         :param name: Database name
         :param engine: Database ClickHouse engine type
         :param zoo_path: ClickHouse zookeeper path for Replicated database engine
-        :param shard_name: Clickhouse shard name for Replicated database engine
+        :param shard_name: Timeplus shard name for Replicated database engine
         :param replica_name: Replica name for Replicated database engine
         """
         if engine and engine not in ('Ordinary', 'Atomic', 'Lazy', 'Replicated'):

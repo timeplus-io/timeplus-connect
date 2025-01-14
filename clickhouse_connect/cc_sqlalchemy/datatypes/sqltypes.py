@@ -13,66 +13,69 @@ from clickhouse_connect.driver.common import decimal_prec
 
 
 class Int8(ChSqlaType, Integer):
-    pass
+    base = ('int8', )
 
 
 class UInt8(ChSqlaType, Integer):
-    pass
+    base = ('uint8', )
 
 
 class Int16(ChSqlaType, Integer):
-    pass
+    base = ('int16', )
 
 
 class UInt16(ChSqlaType, Integer):
-    pass
+    base = ('uint16', )
 
 
 class Int32(ChSqlaType, Integer):
-    pass
+    base = ('int32', 'int')
 
 
 class UInt32(ChSqlaType, Integer):
-    pass
+    base = ('uint32', 'uint')
 
 
 class Int64(ChSqlaType, Integer):
-    pass
+    base = ('int64', )
 
 
 class UInt64(ChSqlaType, Integer):
-    pass
+    base = ('uint64', )
 
 
 class Int128(ChSqlaType, Integer):
-    pass
+    base = ('int128', )
 
 
 class UInt128(ChSqlaType, Integer):
-    pass
+    base = ('uint128', )
 
 
 class Int256(ChSqlaType, Integer):
-    pass
+    base = ('int256', )
 
 
 class UInt256(ChSqlaType, Integer):
-    pass
+    base = ('uint256', )
 
 
 class Float32(ChSqlaType, Float):
+    base = ('float32', )
     def __init__(self, type_def: TypeDef = EMPTY_TYPE_DEF):
         ChSqlaType.__init__(self, type_def)
         Float.__init__(self)
 
 
 class Float64(ChSqlaType, Float):
+    base = ('float32', )
     def __init__(self, type_def: TypeDef = EMPTY_TYPE_DEF):
         ChSqlaType.__init__(self, type_def)
         Float.__init__(self)
 
 
 class Bool(ChSqlaType, SqlaBoolean):
+    base = ('bool', )
     def __init__(self, type_def: TypeDef = EMPTY_TYPE_DEF):
         ChSqlaType.__init__(self, type_def)
         SqlaBoolean.__init__(self)
@@ -83,6 +86,7 @@ class Boolean(Bool):
 
 
 class Decimal(ChSqlaType, Numeric):
+    base = ('Decimal', 'decimal')
     dec_size = 0
 
     def __init__(self, precision: int = 0, scale: int = 0, type_def: TypeDef = None):
@@ -108,24 +112,29 @@ class Decimal(ChSqlaType, Numeric):
 
 # pylint: disable=duplicate-code
 class Decimal32(Decimal):
+    base = ('Decimal32', 'decimal32')
     dec_size = 32
 
 
 class Decimal64(Decimal):
+    base = ('Decimal64', 'decimal64')
     dec_size = 64
 
 
 class Decimal128(Decimal):
+    base = ('Decimal128', 'decimal128')
     dec_size = 128
 
 
 class Decimal256(Decimal):
+    base = ('Decimal256', 'decimal256')
     dec_size = 256
 
 
 class Enum(ChSqlaType, UserDefinedType):
     _size = 16
     python_type = str
+    base = ('enum', )
 
     def __init__(self, enum: Type[PyEnum] = None, keys: Sequence[str] = None, values: Sequence[int] = None,
                  type_def: TypeDef = None):
@@ -162,23 +171,27 @@ class Enum(ChSqlaType, UserDefinedType):
         value_max = 2 ** (cls._size - 1) - 1
         bad_value = next((x for x in values if x < value_min or x > value_max), None)
         if bad_value:
-            raise ArgumentError(f'Clickhouse enum value {bad_value} is out of range')
+            raise ArgumentError(f'Timeplus enum value {bad_value} is out of range')
 
 
 class Enum8(Enum):
     _size = 8
     _ch_type_cls = ChEnum8
+    base = ('enum8', )
 
 
 class Enum16(Enum):
     _ch_type_cls = ChEnum16
+    base = ('enum16', )
 
 
 class String(ChSqlaType, UserDefinedType):
     python_type = str
+    base = ('string', )
 
 
 class FixedString(ChSqlaType, SqlaString):
+    base = ('fixed_string', )
     def __init__(self, size: int = -1, type_def: TypeDef = None):
         if not type_def:
             type_def = TypeDef(values=(size,))
@@ -188,20 +201,24 @@ class FixedString(ChSqlaType, SqlaString):
 
 class IPv4(ChSqlaType, UserDefinedType):
     python_type = None
+    base = ('ipv4', )
 
 
 class IPv6(ChSqlaType, UserDefinedType):
     python_type = None
+    base = ('ipv6', )
 
 
 class UUID(ChSqlaType, UserDefinedType):
     python_type = None
+    base = ('uuid', )
 
 
 class Nothing(ChSqlaType, UserDefinedType):
     python_type = None
 
 
+# proton doesn't support geometric type
 class Point(ChSqlaType, UserDefinedType):
     python_type = None
 
@@ -227,14 +244,15 @@ class MultiLineString(ChSqlaType, UserDefinedType):
 
 
 class Date(ChSqlaType, SqlaDate):
-    pass
+    base = ('date', 'Date')
 
 
 class Date32(ChSqlaType, SqlaDate):
-    pass
+    base = ('date32', 'Date32')
 
 
 class DateTime(ChSqlaType, SqlaDateTime):
+    base = ('datetime', 'DateTime')
     def __init__(self, tz: str = None, type_def: TypeDef = None):
         """
         Date time constructor with optional ClickHouse timezone parameter if not constructed with TypeDef
@@ -252,6 +270,7 @@ class DateTime(ChSqlaType, SqlaDateTime):
 
 
 class DateTime64(ChSqlaType, SqlaDateTime):
+    base = ('datetime64', 'DateTime64')
     def __init__(self, precision: int = None, tz: str = None, type_def: TypeDef = None):
         """
         Date time constructor with precision and timezone parameters if not constructed with TypeDef
@@ -277,6 +296,7 @@ class Nullable:
     Class "wrapper" to use in DDL construction.  It is never actually initialized but instead creates the "wrapped"
     type with a Nullable wrapper
     """
+    base = ('nullable', )
 
     def __new__(cls, element: Union[ChSqlaType, Type[ChSqlaType]]):
         """
@@ -288,9 +308,9 @@ class Nullable:
         if callable(element):
             return element(type_def=NULLABLE_TYPE_DEF)
         if element.low_card:
-            raise ArgumentError('Low Cardinality type cannot be Nullable')
+            raise ArgumentError('Low Cardinality type cannot be nullable')
         orig = element.type_def
-        wrappers = orig if 'Nullable' in orig.wrappers else orig.wrappers + ('Nullable',)
+        wrappers = orig if 'nullable' in orig.wrappers else orig.wrappers + ('nullable',)
         return element.__class__(type_def=TypeDef(wrappers, orig.keys, orig.values))
 
 
@@ -299,6 +319,7 @@ class LowCardinality:
     Class "wrapper" to use in DDL construction.  It is never actually instantiated but instead creates the "wrapped"
     type with a LowCardinality wrapper
     """
+    base = ('low_cardinality', )
 
     def __new__(cls, element: Union[ChSqlaType, Type[ChSqlaType]]):
         """
@@ -310,12 +331,13 @@ class LowCardinality:
         if callable(element):
             return element(type_def=LC_TYPE_DEF)
         orig = element.type_def
-        wrappers = orig if 'LowCardinality' in orig.wrappers else ('LowCardinality',) + orig.wrappers
+        wrappers = orig if 'low_cardinality' in orig.wrappers else ('low_cardinality',) + orig.wrappers
         return element.__class__(type_def=TypeDef(wrappers, orig.keys, orig.values))
 
 
 class Array(ChSqlaType, UserDefinedType):
     python_type = list
+    base = ('array', )
 
     def __init__(self, element: Union[ChSqlaType, Type[ChSqlaType]] = None, type_def: TypeDef = None):
         """
@@ -332,6 +354,7 @@ class Array(ChSqlaType, UserDefinedType):
 
 class Map(ChSqlaType, UserDefinedType):
     python_type = dict
+    base = ('map', )
 
     def __init__(self, key_type: Union[ChSqlaType, Type[ChSqlaType]] = None,
                  value_type: Union[ChSqlaType, Type[ChSqlaType]] = None, type_def: TypeDef = None):
@@ -352,6 +375,7 @@ class Map(ChSqlaType, UserDefinedType):
 
 class Tuple(ChSqlaType, UserDefinedType):
     python_type = tuple
+    base = ('tuple', )
 
     def __init__(self, elements: Sequence[Union[ChSqlaType, Type[ChSqlaType]]] = None, type_def: TypeDef = None):
         """
@@ -370,6 +394,7 @@ class JSON(ChSqlaType, UserDefinedType):
     Note this isn't currently supported for insert/select, only table definitions
     """
     python_type = None
+    base = ('json', )
 
 
 class Nested(ChSqlaType, UserDefinedType):
@@ -377,6 +402,7 @@ class Nested(ChSqlaType, UserDefinedType):
     Note this isn't currently supported for insert/select, only table definitions
     """
     python_type = None
+    base = ('nested', )
 
 
 class Object(ChSqlaType, UserDefinedType):
@@ -384,6 +410,7 @@ class Object(ChSqlaType, UserDefinedType):
     Note this isn't currently supported for insert/select, only table definitions
     """
     python_type = None
+    base = ('object', )
 
     def __init__(self, fmt: str = None, type_def: TypeDef = None):
         if not type_def:
@@ -393,6 +420,7 @@ class Object(ChSqlaType, UserDefinedType):
 
 class SimpleAggregateFunction(ChSqlaType, UserDefinedType):
     python_type = None
+    base = ('simple_aggregate_function', )
 
     def __init__(self, name: str = None, element: Union[ChSqlaType, Type[ChSqlaType]] = None, type_def: TypeDef = None):
         """
@@ -413,6 +441,7 @@ class AggregateFunction(ChSqlaType, UserDefinedType):
     Note this isn't currently supported for insert/select, only table definitions
     """
     python_type = None
+    base = ('aggregate_function', )
 
     def __init__(self, *params, type_def: TypeDef = None):
         """

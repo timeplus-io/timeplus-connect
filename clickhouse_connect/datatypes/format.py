@@ -2,7 +2,7 @@ import re
 
 from typing import Dict, Type, Sequence, Optional
 
-from clickhouse_connect.datatypes.base import ClickHouseType, type_map, ch_read_formats, ch_write_formats
+from clickhouse_connect.datatypes.base import TimeplusType, type_map, ch_read_formats, ch_write_formats
 from clickhouse_connect.driver.exceptions import ProgrammingError
 
 json_re = re.compile('json', re.IGNORECASE)
@@ -46,7 +46,7 @@ def clear_read_format(pattern: str):
         ch_read_formats.pop(ch_type, None)
 
 
-def format_map(fmt_map: Optional[Dict[str, str]]) -> Dict[Type[ClickHouseType], str]:
+def format_map(fmt_map: Optional[Dict[str, str]]) -> Dict[Type[TimeplusType], str]:
     if not fmt_map:
         return {}
     final_map = {}
@@ -67,13 +67,13 @@ def _convert_arguments(*args, **kwargs) -> Dict[str, str]:
     return fmt_map
 
 
-def _matching_types(pattern: str, fmt: str = None) -> Sequence[Type[ClickHouseType]]:
+def _matching_types(pattern: str, fmt: str = None) -> Sequence[Type[TimeplusType]]:
     re_pattern = re.compile(pattern.replace('*', '.*'), re.IGNORECASE)
     matches = [ch_type for type_name, ch_type in type_map.items() if re_pattern.match(type_name)]
     if not matches:
-        raise ProgrammingError(f'Unrecognized ClickHouse type {pattern} when setting formats')
+        raise ProgrammingError(f'Unrecognized Timeplus type {pattern} when setting formats')
     if fmt:
         invalid = [ch_type.__name__ for ch_type in matches if fmt not in ch_type.valid_formats]
         if invalid:
-            raise ProgrammingError(f"{fmt} is not a valid format for ClickHouse types {','.join(invalid)}.")
+            raise ProgrammingError(f"{fmt} is not a valid format for Timeplus types {','.join(invalid)}.")
     return matches

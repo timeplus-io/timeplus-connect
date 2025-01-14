@@ -9,7 +9,7 @@ class TableContext:
                  table: str,
                  columns: Union[str, Sequence[str]],
                  column_types: Optional[Sequence[str]] = None,
-                 engine: str = 'MergeTree',
+                 engine: str = 'Stream(1, 1, rand())',
                  order_by: str = None,
                  settings: Optional[Dict[str, Any]] = None):
         self.client = client
@@ -36,11 +36,11 @@ class TableContext:
 
     def __enter__(self):
         if self.client.min_version('19'):
-            self.client.command(f'DROP TABLE IF EXISTS {self.table}')
+            self.client.command(f'DROP STREAM IF EXISTS {self.table}')
         else:
-            self.client.command(f'DROP TABLE IF EXISTS {self.table} SYNC')
+            self.client.command(f'DROP STREAM IF EXISTS {self.table} SYNC')
         col_defs = ','.join(f'{quote_identifier(name)} {col_type}' for name, col_type in zip(self.column_names, self.column_types))
-        create_cmd = f'CREATE TABLE {self.table} ({col_defs}) ENGINE {self.engine} ORDER BY {self.order_by}'
+        create_cmd = f'CREATE STREAM {self.table} ({col_defs}) ENGINE {self.engine} ORDER BY {self.order_by}'
         if self.settings:
             create_cmd += ' SETTINGS '
             for key, value in self.settings.items():
@@ -51,4 +51,4 @@ class TableContext:
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.client.command(f'DROP TABLE IF EXISTS {self.table}')
+        self.client.command(f'DROP STREAM IF EXISTS {self.table}')
