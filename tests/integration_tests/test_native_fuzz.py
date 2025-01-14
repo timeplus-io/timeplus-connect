@@ -25,14 +25,14 @@ def test_query_fuzz(test_client: Client, test_table_engine: str):
             col_names, col_types = random_columns(TEST_COLUMNS)
             data = random_data(col_types, data_rows, test_client.server_tz)
             col_names = ('row_id',) + col_names
-            col_types = (get_from_name('UInt32'),) + col_types
+            col_types = (get_from_name('uint32'),) + col_types
 
             col_defs = [TableColumnDef(name, ch_type) for name, ch_type in zip(col_names, col_types)]
             create_stmt = create_table('fuzz_test', col_defs, test_table_engine, {'order by': 'row_id'})
             test_client.command(create_stmt, settings={'flatten_nested': 0})
             test_client.insert('fuzz_test', data, col_names)
 
-            data_result = test_client.query('SELECT * FROM fuzz_test')
+            data_result = test_client.query('SELECT * except _tp_time FROM fuzz_test')
             if data_rows:
                 assert data_result.column_names == col_names
                 assert data_result.result_set == data

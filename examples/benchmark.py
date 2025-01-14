@@ -7,37 +7,38 @@ import uuid
 import argparse
 from ipaddress import IPv6Address
 from typing import List
+from time import sleep
 
 import clickhouse_connect
 from clickhouse_connect.datatypes.format import set_default_formats
 from clickhouse_connect.driver.client import Client
 
 columns = {
-    'int8': ('Int8', -44),
-    'uint16': ('UInt16', 1),
-    'int16': ('Int16', -2),
-    'uint64': ('UInt64', 32489071615273482),
-    'float32': ('Float32', 3.14),
-    'str': ('String', 'hello'),
-    'fstr': ('FixedString(16)', b'world numkn \nman'),
+    'int8': ('int8', -44),
+    'uint16': ('uint16', 1),
+    'int16': ('int16', -2),
+    'uint64': ('uint64', 32489071615273482),
+    'float32': ('float32', 3.14),
+    'str': ('string', 'hello'),
+    'fstr': ('fixed_string(16)', b'world numkn \nman'),
     'date': ('Date', datetime.date(2022, 3, 18)),
     'datetime': ('DateTime', datetime.datetime.utcnow()),
-    'nullint': ('Nullable(Int8)', {None, 77}),
-    'nullstr': ('Nullable(String)', {None, 'a_null_str'}),
-    'enum': ("Enum16('hello' = 1, 'world' = 2)", 'hello'),
-    'array': ('Array(String)', ['q', 'w', 'e', 'r']),
-    'narray': ('Array(Array(String))', [['xkcd', 'abs', 'norbert'], ['George', 'John', 'Thomas']]),
-    'uuid': ('UUID', uuid.UUID('1d439f79-c57d-5f23-52c6-ffccca93e1a9')),
-    'bool': ('Bool', True),
-    'ipv4': ('IPv4', '107.34.202.7'),
-    'ipv6': ('IPv6', IPv6Address('fe80::f4d4:88ff:fe88:4a64')),
-    'tuple': ('Tuple(Nullable(String), UInt64)', ('tuple_string', 7502888)),
+    'nullint': ('nullable(int8)', {None, 77}),
+    'nullstr': ('nullable(string)', {None, 'a_null_str'}),
+    'enum': ("enum16('hello' = 1, 'world' = 2)", 'hello'),
+    'array': ('array(string)', ['q', 'w', 'e', 'r']),
+    'narray': ('array(array(string))', [['xkcd', 'abs', 'norbert'], ['George', 'John', 'Thomas']]),
+    'uuid': ('uuid', uuid.UUID('1d439f79-c57d-5f23-52c6-ffccca93e1a9')),
+    'bool': ('bool', True),
+    'ipv4': ('ipv4', '107.34.202.7'),
+    'ipv6': ('ipv6', IPv6Address('fe80::f4d4:88ff:fe88:4a64')),
+    'tuple': ('tuple(nullable(string), uint64)', ('tuple_string', 7502888)),
     'dec': ('Decimal64(5)', 25774.233),
     'bdec': ('Decimal128(10)', 2503.48877233),
-    'uint256': ('UInt256', 1057834823498238884432566),
+    'uint256': ('uint256', 1057834823498238884432566),
     'dt64': ('DateTime64(9)', datetime.datetime.now()),
     'dt64d': ("DateTime64(6, 'America/Denver')", datetime.datetime.now()),
-    'lcstr': ('LowCardinality(String)', 'A simple string')
+    'lcstr': ('low_cardinality(string)', 'A simple string')
 }
 
 standard_cols = ['uint16', 'int16', 'float32', 'str', 'fstr', 'date', 'datetime', 'array', 'nullint', 'enum', 'uuid']
@@ -47,8 +48,8 @@ def create_table(client: Client, col_names: List[str], rows: int):
     if not col_names:
         col_names = columns.keys()
     col_list = ','.join([f'{col_name} {columns[col_name][0]}' for col_name in sorted(col_names)])
-    client.command('DROP TABLE IF EXISTS benchmark_test')
-    client.command(f'CREATE TABLE benchmark_test ({col_list}) ENGINE Memory')
+    client.command('DROP STREAM IF EXISTS benchmark_test')
+    client.command(f'CREATE STREAM benchmark_test ({col_list})')
     insert_cols = []
     for col_name in sorted(col_names):
         col_def = columns[col_name]
@@ -59,19 +60,20 @@ def create_table(client: Client, col_names: List[str], rows: int):
         else:
             col = [col_def[1]] * rows
         insert_cols.append(col)
-    client.insert('benchmark_test', insert_cols, column_oriented=True)
+    client.insert('benchmark_test', insert_cols, sorted(standard_cols), column_oriented=True)
+    sleep(1)
 
 
 def check_reads(client: Client, tries: int = 50, rows: int = 100000):
     start_time = time.time()
-    for _ in range(tries):
-        result = client.query(f'SELECT * FROM benchmark_test LIMIT {rows}', column_oriented=True)
+    for i in range(tries):
+        result = client.query(f'SELECT * FROM table(benchmark_test) LIMIT {rows}', column_oriented=True)
         assert result.row_count == rows
-    total_time = time.time() - start_time
-    avg_time = total_time / tries
-    speed = int(1 / avg_time * rows)
-    print(f'- Avg time reading {rows} rows from {tries} runs: {avg_time} sec. Total: {total_time}')
-    print(f'  Speed: {speed} rows/sec')
+        total_time = time.time() - start_time
+        avg_time = total_time / tries
+        speed = int(1 / avg_time * rows)
+        print(f'runs:{i}  Speed: {speed} rows/sec')
+    print(f'- Avg time reading {rows} rows from {tries} total runs: {avg_time} sec. Total: {total_time}')
 
 
 def main():
@@ -95,8 +97,13 @@ def main():
     else:
         col_names = standard_cols
     client = clickhouse_connect.get_client(compress=False)
-
-    set_default_formats('IP*', 'native', '*Int64', 'native')
+    client.command('DROP STREAM IF EXISTS test_low_card_dict')
+    client.command('CREATE STREAM test_low_card_dict (key int32, lc low_cardinality(string))')
+    data = [[x, str(x)] for x in range(30000)]
+    column_names = ['key', 'lc']
+    client.insert('test_low_card_dict', data, column_names)
+    assert 30000 == client.command('SELECT count() FROM table(test_low_card_dict)')
+    set_default_formats('IP*', 'native', '*int64', 'native')
     create_table(client, col_names, rows)
     check_reads(client, tries, rows)
 

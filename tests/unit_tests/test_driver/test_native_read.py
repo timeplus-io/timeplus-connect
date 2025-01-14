@@ -1,5 +1,6 @@
 from ipaddress import IPv4Address
 from uuid import UUID
+import pytest
 
 from clickhouse_connect.datatypes import registry
 from clickhouse_connect.driver.insert import InsertContext
@@ -90,7 +91,7 @@ def test_map():
 
 def test_ip():
     ips = ['192.168.5.3', '202.44.8.25', '0.0.2.2']
-    ipv4_type = registry.get_from_name('IPv4')
+    ipv4_type = registry.get_from_name('ipv4')
     dest = bytearray()
     ipv4_type.write_column(ips, dest, InsertContext('', [], []))
     python = ipv4_type.read_column_data(bytes_source(bytes(dest)), 3, QueryContext(), None)
@@ -98,6 +99,7 @@ def test_ip():
 
 
 def test_point():
+    pytest.skip("proton doesn;t support geometric type")
     points = ((3.22, 3.22),(5.22, 5.22),(4.22, 4.22))
     point_type = registry.get_from_name('Point')
     dest = bytearray()

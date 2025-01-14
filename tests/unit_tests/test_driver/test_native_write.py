@@ -61,7 +61,7 @@ LOW_CARDINALITY_NULLABLE_OUTPUT = """
 def test_low_card_null():
     data = [['three']]
     names = ['value']
-    types = [get_from_name('LowCardinality(Nullable(String))')]
+    types = [get_from_name('low_cardinality(nullable(string))')]
     output = native_insert_block(data, names, types)
     assert bytes(output) == to_bytes(LOW_CARD_OUTPUT)
 
@@ -69,7 +69,7 @@ def test_low_card_null():
 def test_tuple_one():
     data = [[('string1', 3.22, None)]]
     names = ['value']
-    types = [get_from_name('Tuple(String, Float32, LowCardinality(Nullable(String)))')]
+    types = [get_from_name('tuple(string, float32, low_cardinality(nullable(string)))')]
     output = native_insert_block(data, names, types)
     assert bytes(output) == bytes.fromhex(TUPLE_ONE_OUTPUT)
 
@@ -77,7 +77,7 @@ def test_tuple_one():
 def test_tuple_three():
     data = [[('string1',)], [('string2',)], [('string3',)]]
     names = ['value']
-    types = [get_from_name('Tuple(String)')]
+    types = [get_from_name('tuple(string)')]
     output = native_insert_block(data, names, types)
     assert bytes(output) == bytes.fromhex(TUPLE_THREE_OUTPUT)
 
@@ -95,7 +95,7 @@ def test_nested():
             ([{'str1': 'three', 'int32': 5}, {'str1': 'five', 'int32': 77}],),
             ([{'str1': 'one', 'int32': 5}, {'str1': 'two', 'int32': 55}],),
             ([{'str1': 'one', 'int32': 5}, {'str1': 'two', 'int32': 55}],)]
-    types = [get_from_name('Nested(str1 String, int32 UInt32)')]
+    types = [get_from_name('nested(str1 string, int32 uint32)')]
     output = native_insert_block(data, ['nested'], types)
     assert bytes(output) == bytes.fromhex(NESTED_BINARY)
 
@@ -103,7 +103,7 @@ def test_nested():
 def test_string_accepts_bytes():
     data = [[bytes.fromhex('ff')]]
     names = ['value']
-    types = [get_from_name('String')]
+    types = [get_from_name('string')]
     output = native_insert_block(data, names, types)
     assert bytes(output) == bytes.fromhex(STRING_ACCEPTS_BYTES_OUTPUT)
 
@@ -114,15 +114,15 @@ def test_long_str():
          '箻躰䆲⏂錬횬渪㜟첯鋘ꊩ㾝톶╁茒牾붮뚂О灪噚놾蠂쌇龥䁼')
     data = [[x]]
     names = ['value']
-    types = [get_from_name('String')]
+    types = [get_from_name('string')]
     output = native_insert_block(data, names, types)
-    assert bytes(output) == b'\x01\x01\x05value\x06String\xe7\x03' + x.encode()
+    assert bytes(output) == b'\x01\x01\x05value\x06string\xe7\x03' + x.encode()
 
 
 def test_low_card_map():
     data = [[{'key1': '1', 'key2': 'two'}], [{}]]
     names = ['MAP']
-    types = [get_from_name('Map(LowCardinality(String), String)')]
+    types = [get_from_name('map(low_cardinality(string), string)')]
     output = native_insert_block(data, names, types)
     assert bytes(output) == bytes.fromhex(MAP_LOW_CARDINALITY_OUTPUT)
 
@@ -130,7 +130,7 @@ def test_low_card_map():
 def test_low_card_nullable():
     data = [['first'], [None]]
     names = ['str']
-    types = [get_from_name('LowCardinality(Nullable(String))')]
+    types = [get_from_name('low_cardinality(nullable(string))')]
     output = native_insert_block(data, names, types)
     assert bytes(output) == bytes.fromhex(LOW_CARDINALITY_NULLABLE_OUTPUT)
 
@@ -138,7 +138,7 @@ def test_low_card_nullable():
 def test_bad_columns():
     data = [['str'], [3.5]]
     names = ['value']
-    types = [get_from_name('String')]
+    types = [get_from_name('string')]
     try:
         native_insert_block(data, names, types)
     except TypeError:
@@ -146,7 +146,7 @@ def test_bad_columns():
 
     data = [[3.5], [str]]
     names = ['value']
-    types = [get_from_name('Float64')]
+    types = [get_from_name('float64')]
 
     try:
         native_insert_block(data, names, types)

@@ -3,7 +3,6 @@ import logging
 import os
 import random
 from typing import Callable
-
 import pytest
 from clickhouse_connect.driver.exceptions import ProgrammingError
 
@@ -22,8 +21,8 @@ def test_numpy_dates(test_client: Client, table_context: Callable):
     np_array = np.array(dt_ds, dtype='datetime64[s]').reshape(-1, 1)
     source_arr = np_array.copy()
     with table_context('test_numpy_dates', dt_ds_columns, dt_ds_types):
-        test_client.insert('test_numpy_dates', np_array)
-        new_np_array = test_client.query_np('SELECT * FROM test_numpy_dates')
+        test_client.insert('test_numpy_dates', np_array, dt_ds_columns)
+        new_np_array = test_client.query_np('SELECT * except _tp_time FROM test_numpy_dates WHERE _tp_time > earliest_ts() LIMIT 2')
         assert np.array_equal(np_array, new_np_array)
         assert np.array_equal(source_arr, np_array)
 
@@ -49,10 +48,13 @@ def test_numpy_record_type(test_client: Client, table_context: Callable):
     source_arr = np_array.copy()
     np_array.dtype.names = basic_ds_columns
     with table_context('test_numpy_basic', basic_ds_columns, ds_types):
-        test_client.insert('test_numpy_basic', np_array)
-        new_np_array = test_client.query_np('SELECT * FROM test_numpy_basic', max_str_len=20)
+        test_client.insert('test_numpy_basic', np_array, basic_ds_columns)
+        new_np_array = test_client.query_np(
+            'SELECT * except _tp_time FROM test_numpy_basic WHERE _tp_time > earliest_ts() LIMIT 3',
+            max_str_len=20
+        )
         assert np.array_equal(np_array, new_np_array)
-        empty_np_array = test_client.query_np("SELECT * FROM test_numpy_basic WHERE key = 'NOT A KEY' ")
+        empty_np_array = test_client.query_np("SELECT * except _tp_time FROM table(test_numpy_basic) WHERE key = 'NOT A KEY'")
         assert len(empty_np_array) == 0
         assert np.array_equal(source_arr, np_array)
 
@@ -68,8 +70,8 @@ def test_numpy_object_type(test_client: Client, table_context: Callable):
     np_array.dtype.names = basic_ds_columns
     source_arr = np_array.copy()
     with table_context('test_numpy_basic', basic_ds_columns, ds_types):
-        test_client.insert('test_numpy_basic', np_array)
-        new_np_array = test_client.query_np('SELECT * FROM test_numpy_basic')
+        test_client.insert('test_numpy_basic', np_array, basic_ds_columns)
+        new_np_array = test_client.query_np('SELECT * except _tp_time FROM test_numpy_basic WHERE _tp_time > earliest_ts() LIMIT 3')
         assert np.array_equal(np_array, new_np_array)
         assert np.array_equal(source_arr, np_array)
 
@@ -79,8 +81,11 @@ def test_numpy_nulls(test_client: Client, table_context: Callable):
     np_array = np.rec.fromrecords(null_ds, dtype=np_types)
     source_arr = np_array.copy()
     with table_context('test_numpy_nulls', null_ds_columns, null_ds_types):
-        test_client.insert('test_numpy_nulls', np_array)
-        new_np_array = test_client.query_np('SELECT * FROM test_numpy_nulls', use_none=True)
+        test_client.insert('test_numpy_nulls', np_array, null_ds_columns)
+        new_np_array = test_client.query_np(
+            'SELECT * except _tp_time FROM test_numpy_nulls WHERE _tp_time > earliest_ts() LIMIT 4',
+            use_none=True
+        )
         assert list_equal(np_array.tolist(), new_np_array.tolist())
         assert list_equal(source_arr.tolist(), np_array.tolist())
 
@@ -91,14 +96,18 @@ def test_numpy_matrix(test_client: Client, table_context: Callable):
     source_array = np.array(source, dtype='int32')
     matrix = source_array.reshape((5, 3))
     matrix_copy = matrix.copy()
-    with table_context('test_numpy_matrix', ['col1 Int32', 'col2 Int32', 'col3 Int32']):
-        test_client.insert('test_numpy_matrix', matrix)
-        py_result = test_client.query('SELECT * FROM test_numpy_matrix').result_set
+    with table_context('test_numpy_matrix', ['col1 int32', 'col2 int32', 'col3 int32']):
+        test_client.insert('test_numpy_matrix', matrix, ['col1', 'col2', 'col3'])
+        py_result = test_client.query(
+            'SELECT * except _tp_time FROM test_numpy_matrix WHERE _tp_time > earliest_ts() ORDER BY col1 LIMIT 5'
+        ).result_set
         assert list(py_result[1]) == [25000, -37283, 4000]
-        numpy_result = test_client.query_np('SELECT * FROM test_numpy_matrix')
+        numpy_result = test_client.query_np(
+            'SELECT * except _tp_time FROM test_numpy_matrix WHERE _tp_time > earliest_ts() ORDER BY col1 LIMIT 5'
+        )
         assert list(numpy_result[1]) == list(py_result[1])
-        test_client.command('TRUNCATE TABLE test_numpy_matrix')
-        numpy_result = test_client.query_np('SELECT * FROM test_numpy_matrix')
+        test_client.command('TRUNCATE test_numpy_matrix')
+        numpy_result = test_client.query_np('SELECT * except _tp_time FROM table(test_numpy_matrix)')
         assert np.size(numpy_result) == 0
         assert np.array_equal(matrix, matrix_copy)
 
@@ -109,14 +118,18 @@ def test_numpy_bigint_matrix(test_client: Client, table_context: Callable):
     source_array = np.array(source, dtype='int64')
     matrix = source_array.reshape((5, 3))
     matrix_copy = matrix.copy()
-    columns = ['col1 UInt256', 'col2 Int64', 'col3 Int128']
-    if not test_client.min_version('21'):
-        columns = ['col1 UInt64', 'col2 Int64', 'col3 Int64']
+    columns = ['col1 uint256', 'col2 int64', 'col3 int128']
+    # if not test_client.min_version('21'):
+    #     columns = ['col1 uint64', 'col2 int64', 'col3 int64']
     with table_context('test_numpy_bigint_matrix', columns):
-        test_client.insert('test_numpy_bigint_matrix', matrix)
-        py_result = test_client.query('SELECT * FROM test_numpy_bigint_matrix').result_set
+        test_client.insert('test_numpy_bigint_matrix', matrix, ['col1', 'col2', 'col3'])
+        py_result = test_client.query(
+            'SELECT * except _tp_time FROM test_numpy_bigint_matrix WHERE _tp_time > earliest_ts() ORDER BY col1  LIMIT 5'
+        ).result_set
         assert list(py_result[1]) == [25000, -37283, 4000]
-        numpy_result = test_client.query_np('SELECT * FROM test_numpy_bigint_matrix')
+        numpy_result = test_client.query_np(
+            'SELECT * except _tp_time FROM test_numpy_bigint_matrix WHERE _tp_time > earliest_ts() ORDER BY col1 LIMIT 5'
+        )
         assert list(numpy_result[1]) == list(py_result[1])
         assert np.array_equal(matrix, matrix_copy)
 
@@ -126,14 +139,18 @@ def test_numpy_bigint_object(test_client: Client, table_context: Callable):
               ('key2', '348147832478', datetime.datetime.now())]
     np_array = np.array(source, dtype='O,uint64,datetime64[s]')
     source_arr = np_array.copy()
-    columns = ['key String', 'big_value UInt256', 'dt DateTime']
+    columns = ['key string', 'big_value uint256', 'dt DateTime']
     if not test_client.min_version('21'):
-        columns = ['key String', 'big_value UInt64', 'dt DateTime']
+        columns = ['key string', 'big_value uint64', 'dt DateTime']
     with table_context('test_numpy_bigint_object', columns):
-        test_client.insert('test_numpy_bigint_object', np_array)
-        py_result = test_client.query('SELECT * FROM test_numpy_bigint_object').result_set
+        test_client.insert('test_numpy_bigint_object', np_array, ['key', 'big_value', 'dt'])
+        py_result = test_client.query(
+            'SELECT * except _tp_time FROM test_numpy_bigint_object WHERE _tp_time > earliest_ts() LIMIT 2'
+        ).result_set
         assert list(py_result[0]) == list(source[0])
-        numpy_result = test_client.query_np('SELECT * FROM test_numpy_bigint_object')
+        numpy_result = test_client.query_np(
+            'SELECT * except _tp_time FROM test_numpy_bigint_object WHERE _tp_time > earliest_ts() LIMIT 2'
+        )
         assert list(py_result[1]) == list(numpy_result[1])
         assert np.array_equal(source_arr, np_array)
 

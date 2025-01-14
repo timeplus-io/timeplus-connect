@@ -1,5 +1,5 @@
 from enum import Enum as PyEnum
-
+import pytest
 import sqlalchemy as db
 from sqlalchemy import MetaData
 
@@ -16,6 +16,7 @@ from clickhouse_connect.cc_sqlalchemy.ddl.tableengine import engine_map
 
 
 def test_create_database(test_engine: Engine, test_config: TestConfig, test_db: str):
+    pytest.skip("proton default user hasn't enough privileges to create a database")
     if test_db:
         common.set_setting('invalid_setting_action', 'drop')
         conn = test_engine.connect()
@@ -40,12 +41,12 @@ def test_create_table(test_engine: Engine, test_db: str, test_table_engine: str)
     conn = test_engine.connect()
     table_cls = engine_map[test_table_engine]
     metadata = db.MetaData(bind=test_engine, schema=test_db)
-    conn.execute('DROP TABLE IF EXISTS simple_table_test')
+    conn.execute('DROP STREAM IF EXISTS simple_table_test')
     bool_type = Boolean
     date_tz64_type = DateTime64(3, 'Europe/Moscow')
-    if not conn.connection.connection.client.min_version('20'):
-        bool_type = Int8
-        date_tz64_type = DateTime('Europe/Moscow')
+    # if not conn.connection.connection.client.min_version('20'):
+    #     bool_type = Int8
+    #     date_tz64_type = DateTime('Europe/Moscow')
     table = db.Table('simple_table_test', metadata,
                      db.Column('key_col', Int8),
                      db.Column('uint_col', UInt16),
@@ -55,9 +56,9 @@ def test_create_table(test_engine: Engine, test_db: str, test_table_engine: str)
                      db.Column('str_col', String),
                      db.Column('fstr_col', FixedString(17)),
                      db.Column('bool_col', bool_type),
-                     table_cls(('key_col', 'uint_col'), primary_key='key_col'))
+                     table_cls({'replication_factor': '1','shards': '1','shard_by_expr': 'rand()'}))
     table.create(conn)
-    conn.execute('DROP TABLE IF EXISTS advanced_table_test')
+    conn.execute('DROP STREAM IF EXISTS advanced_table_test')
     table = db.Table('advanced_table_test', metadata,
                      db.Column('key_col', UInt64),
                      db.Column('uuid_col', UUID),
@@ -69,20 +70,20 @@ def test_create_table(test_engine: Engine, test_db: str, test_table_engine: str)
                      db.Column('null_dt_col', Nullable(DateTime('America/Denver'))),
                      db.Column('arr_col', Array(UUID)),
                      db.Column('agg_col', AggregateFunction('uniq', LowCardinality(String))),
-                     table_cls('key_col'))
+                     table_cls({'replication_factor': '1','shards': '1','shard_by_expr': 'rand()'}))
     table.create(conn)
 
 
 def test_declarative(test_engine: Engine, test_db: str, test_table_engine: str):
     common.set_setting('invalid_setting_action', 'drop')
     conn = test_engine.connect()
-    conn.execute('DROP TABLE IF EXISTS users_test')
+    conn.execute('DROP STREAM IF EXISTS users_test')
     table_cls = engine_map[test_table_engine]
     base_cls = declarative_base(metadata=MetaData(schema=test_db))
 
     class User(base_cls):
         __tablename__ = 'users_test'
-        __table_args__ = (table_cls(order_by=['id', 'name']),)
+        __table_args__ = (table_cls({'replication_factor': '1','shards': '1','shard_by_expr': 'rand()'}),)
         id = db.Column(UInt32, primary_key=True)
         name = db.Column(String)
         fullname = db.Column(String)

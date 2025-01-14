@@ -8,12 +8,12 @@ from clickhouse_connect.cc_sqlalchemy.dialect import ClickHouseDialect
 dialect = ClickHouseDialect()
 
 replicated_mt_ddl = """\
-CREATE TABLE `replicated_mt_test` (`key` UInt64) Engine ReplicatedMergeTree('/clickhouse/tables/repl_mt_test',\
+CREATE STREAM `replicated_mt_test` (`key` uint64) Engine ReplicatedMergeTree('/clickhouse/tables/repl_mt_test',\
  '{replica}') ORDER BY key\
 """
 
 replacing_mt_ddl = """\
-CREATE TABLE `replacing_mt_test` (`key` UInt32, `date` DateTime) Engine ReplacingMergeTree(date) ORDER BY key\
+CREATE STREAM `replacing_mt_test` (`key` uint32, `date` DateTime) Engine ReplacingMergeTree(date) ORDER BY key\
 """
 
 

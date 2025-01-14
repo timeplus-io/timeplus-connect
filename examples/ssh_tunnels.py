@@ -10,12 +10,12 @@ import clickhouse_connect
 #  This example uses the following ssh tunnel command
 #  ssh -f -N -L 1443:play.clickhouse.com:443 <jump host user>@<jump host> -i <ssh private key file>
 def direct_tunnel():
-    client = clickhouse_connect.get_client(host='localhost',
-                                           user='play',
-                                           password='clickhouse',
-                                           port=1443,
-                                           secure=True,
-                                           server_host_name='play.clickhouse.com')
+    client = timeplus_connect.get_client(host='localhost',
+                                         user='default',
+                                         password='',
+                                         port=3218,
+                                         secure=True,
+                                         server_host_name='play.clickhouse.com')
     print(client.query('SHOW DATABASES').result_set)
     client.close()
 
@@ -41,13 +41,13 @@ def create_tunnel():
     )
     server.start()
 
-    client = clickhouse_connect.get_client(host='localhost',
-                                           user='play',
-                                           password='clickhouse',
-                                           port=1443,
-                                           secure=True,
-                                           verify=True,
-                                           server_host_name='play.clickhouse.com')
+    client = timeplus_connect.get_client(host='localhost',
+                                         user='default',
+                                         password='',
+                                         port=3218,
+                                         secure=True,
+                                         verify=True,
+                                         server_host_name='play.clickhouse.com')
     print(client.query('SHOW DATABASES').result_set)
     client.close()
     server.close()

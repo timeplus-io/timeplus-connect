@@ -8,12 +8,12 @@ from clickhouse_connect.driver.query import QueryContext
 
 def test_default_formats():
     ctx = QueryContext()
-    set_default_formats('Int32', 'string', 'IP*', 'string')
+    set_default_formats('int32', 'string', 'IP*', 'string')
     assert IPv6.read_format(ctx) == 'string'
     assert Int32.read_format(ctx) == 'string'
     assert FixedString.read_format(ctx) == 'native'
 
 
 def test_fixed_str_format():
-    set_write_format('FixedString', 'string')
+    set_write_format('fixed_string', 'string')
     assert FixedString.write_format(BaseQueryContext()) == 'string'

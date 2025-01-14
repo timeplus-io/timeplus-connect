@@ -7,7 +7,7 @@ import clickhouse_connect
 
 def main():
     host = os.getenv('CLICKHOUSE_CONNECT_TEST_HOST', 'localhost')
-    port = int(os.getenv('CLICKHOUSE_CONNECT_TEST_PORT', '8123'))
+    port = int(os.getenv('CLICKHOUSE_CONNECT_TEST_PORT', '3218'))
     password = os.getenv('CLICKHOUSE_CONNECT_TEST_PASSWORD', '')
     client = clickhouse_connect.get_client(host=host, port=port, password=password)
     database_result = client.query("SELECT name FROM system.databases WHERE name ilike '%test%'").result_rows

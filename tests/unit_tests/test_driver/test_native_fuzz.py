@@ -23,7 +23,7 @@ def test_native_round_trips():
         col_names, col_types = random_columns(TEST_COLUMNS)
         data = random_data(col_types, data_rows)
         col_names = ('row_id',) + col_names
-        col_types = (get_from_name('UInt32'),) + col_types
+        col_types = (get_from_name('uint32'),) + col_types
         assert len(data) == data_rows
         output = native_insert_block(data, column_names=col_names, column_types=col_types)
         data_result = native_transform.parse_response(bytes_source(output, cls=BuffCls))
@@ -41,7 +41,7 @@ def test_native_small():
         col_names, col_types = random_columns(1)
         data = random_data(col_types, 2)
         col_names = ('row_id',) + col_names
-        col_types = (get_from_name('UInt32'),) + col_types
+        col_types = (get_from_name('uint32'),) + col_types
         output = native_insert_block(data, column_names=col_names, column_types=col_types)
         data_result = native_transform.parse_response(bytes_source(output, cls=BuffCls))
         assert data_result.column_names == col_names

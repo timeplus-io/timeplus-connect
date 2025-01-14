@@ -16,7 +16,7 @@ def test_threading_error(test_config: TestConfig, test_client: Client):
         def run(self):
             nonlocal thrown
             try:
-                test_client.command('SELECT randomString(512) FROM numbers(1000000)')
+                test_client.command('SELECT random_string(512) FROM numbers(1000000)')
             except ProgrammingError as ex:
                 thrown = ex
 

@@ -36,7 +36,7 @@ def test_cursor(test_engine: Engine):
 
     cursor.execute(sql)
     assert cursor.description[0][0] == 'database'
-    assert cursor.description[1][1] == 'String'
+    assert cursor.description[1][1] == 'string'
     assert len(getattr(cursor, 'data')) == 2
     assert cursor.summary[0]["read_rows"] == '2'
     raw_conn.close()
@@ -47,13 +47,13 @@ def test_execute(test_engine: Engine):
 
     with test_engine.begin() as conn:
         sql = test_query
-        if not conn.connection.connection.client.min_version('21'):
-            sql = test_query_ver19
+        # if not conn.connection.connection.client.min_version('21'):
+        #     sql = test_query_ver19
         rows = list(row for row in conn.execute(sql))
         assert len(rows) == 2
 
-        rows = list(row for row in conn.execute('DROP TABLE IF EXISTS dummy_table'))
+        rows = list(row for row in conn.execute('DROP STREAM IF EXISTS dummy_table'))
         assert rows[0][0] == 0
 
-        rows = list(row for row in conn.execute('describe TABLE system.columns'))
-        assert len(rows) > 5
+        rows = list(row for row in conn.execute('DESCRIBE dummy'))
+        assert len(rows) == 3

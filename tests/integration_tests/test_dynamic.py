@@ -17,16 +17,16 @@ def type_available(test_client: Client, data_type: str):
 def test_variant(test_client: Client, table_context: Callable):
     type_available(test_client, 'variant')
     with table_context('basic_variants', [
-        'key Int32',
-        'v1 Variant(UInt64, String, Array(UInt64), UUID)',
-        'v2 Variant(IPv4, Decimal(10, 2))']):
+        'key int32',
+        'v1 Variant(uint64, string, array(uint64), )',
+        'v2 Variant(ipv4, Decimal(10, 2))']):
         data = [[1, 58322, None],
                 [2, 'a string', 55.2],
                 [3, 'bef56f14-0870-4f82-a35e-9a47eff45a5b', 777.25],
                 [4, [120, 250], '243.12.55.44']
                 ]
         test_client.insert('basic_variants', data)
-        result = test_client.query('SELECT * FROM basic_variants ORDER BY key').result_set
+        result = test_client.query('SELECT * except _tp_time FROM basic_variants ORDER BY key').result_set
         assert result[2][1] == UUID('bef56f14-0870-4f82-a35e-9a47eff45a5b')
         assert result[2][2] == 777.25
         assert result[3][1] == [120, 250]
@@ -36,10 +36,10 @@ def test_variant(test_client: Client, table_context: Callable):
 def test_nested_variant(test_client: Client, table_context: Callable):
     type_available(test_client, 'variant')
     with table_context('nested_variants', [
-        'key Int32',
-        'm1 Map(String, Variant(String, UInt128, Bool))',
-        't1 Tuple(Int64, Variant(Bool, String, Int32))',
-        'a1 Array(Array(Variant(String, DateTime, Float64)))',
+        'key int32',
+        'm1 map(string, Variant(string, uint128, Bool))',
+        't1 tuple(int64, Variant(Bool, string, int32))',
+        'a1 array(array(Variant(string, DateTime, float64)))',
     ]):
         data = [[1,
                  {'k1': 'string1', 'k2': 34782477743, 'k3':True},
@@ -53,7 +53,7 @@ def test_nested_variant(test_client: Client, table_context: Callable):
                  ]
                 ]
         test_client.insert('nested_variants', data)
-        result = test_client.query('SELECT * FROM nested_variants ORDER BY key').result_set
+        result = test_client.query('SELECT * except _tp_time FROM nested_variants ORDER BY key').result_set
         assert result[0][1]['k1'] == 'string1'
         assert result[0][1]['k2'] == 34782477743
         assert result[0][2] == (-40, True)
@@ -64,18 +64,18 @@ def test_nested_variant(test_client: Client, table_context: Callable):
 def test_dynamic_nested(test_client: Client, table_context: Callable):
     type_available(test_client, 'dynamic')
     with table_context('nested_dynamics', [
-        'm2 Map(String, Dynamic)'
+        'm2 map(string, Dynamic)'
         ], order_by='()'):
         data = [({'k4': 'string8', 'k5': 5000},)]
         test_client.insert('nested_dynamics', data)
-        result = test_client.query('SELECT * FROM nested_dynamics').result_set
+        result = test_client.query('SELECT * except _tp_time FROM nested_dynamics').result_set
         assert result[0][0]['k5'] == '5000'
 
 
 def test_dynamic(test_client: Client, table_context: Callable):
     type_available(test_client, 'dynamic')
     with table_context('basic_dynamic', [
-        'key UInt64',
+        'key uint64',
         'v1 Dynamic',
         'v2 Dynamic']):
         data = [[1, 58322, 15.5],
@@ -84,7 +84,7 @@ def test_dynamic(test_client: Client, table_context: Callable):
                 [4, [120, 250], 577.22]
                 ]
         test_client.insert('basic_dynamic', data)
-        result = test_client.query('SELECT * FROM basic_dynamic ORDER BY key').result_set
+        result = test_client.query('SELECT * except _tp_time FROM basic_dynamic ORDER BY key').result_set
         assert result[2][1] == 'bef56f14-0870-4f82-a35e-9a47eff45a5b'
         assert result[3][1] == '[120, 250]'
         assert result[2][2] == '777.25'
@@ -93,7 +93,7 @@ def test_dynamic(test_client: Client, table_context: Callable):
 def test_basic_json(test_client: Client, table_context: Callable):
     type_available(test_client, 'json')
     with table_context('new_json_basic', [
-        'key Int32',
+        'key int32',
         'value JSON',
         "null_value JSON"
     ]):
@@ -106,7 +106,7 @@ def test_basic_json(test_client: Client, table_context: Callable):
             [20, None, njv2],
             [25, jv3, njv3]])
 
-        result = test_client.query('SELECT * FROM new_json_basic ORDER BY key').result_set
+        result = test_client.query('SELECT * except _tp_time FROM new_json_basic ORDER BY key').result_set
         json1 = result[0][1]
         assert json1['HKD@spéçiäl'] == 'Special K'
         assert 'key3' not in json1
@@ -132,12 +132,12 @@ def test_basic_json(test_client: Client, table_context: Callable):
 def test_typed_json(test_client: Client, table_context: Callable):
     type_available(test_client, 'json')
     with table_context('new_json_typed', [
-        'key Int32',
+        'key int32',
         'value JSON(max_dynamic_paths=150, `a.b` DateTime64(3), SKIP a.c)'
     ]):
         v1 = '{"a":{"b":"2020-10-15T10:15:44.877", "c":"skip_me"}}'
         test_client.insert('new_json_typed', [[1, v1]])
-        result = test_client.query('SELECT * FROM new_json_typed ORDER BY key')
+        result = test_client.query('SELECT * except _tp_time FROM new_json_typed ORDER BY key')
         json1 = result.result_set[0][1]
         assert json1['a']['b'] == datetime.datetime(2020, 10, 15, 10, 15, 44, 877000)
 
@@ -147,11 +147,11 @@ def test_complex_json(test_client: Client, table_context: Callable):
     if not test_client.min_version('24.10'):
         pytest.skip('Complex JSON broken before 24.10')
     with table_context('new_json_complex', [
-        'key Int32',
-        'value Tuple(t JSON)'
+        'key int32',
+        'value tuple(t JSON)'
         ]):
         data = [[100, ({'a': 'qwe123', 'b': 'main', 'c': None},)]]
         test_client.insert('new_json_complex', data)
-        result = test_client.query('SELECT * FROM new_json_complex ORDER BY key')
+        result = test_client.query('SELECT * except _tp_time FROM new_json_complex ORDER BY key')
         json1 = result.result_set[0][1]
         assert json1['t']['a'] == 'qwe123'
