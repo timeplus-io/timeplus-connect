@@ -148,7 +148,7 @@ class InsertContext(BaseQueryContext):
         data = []
         for df_col_name, col_name, ch_type in zip(df.columns, self.column_names, self.column_types):
             df_col = df[df_col_name]
-            d_type = str(df_col.dtype)
+            d_type_kind = str(df_col.dtype)
             if ch_type.python_type == int:
                 if d_type_kind == 'f':
                     df_col = df_col.round().astype(ch_type.pd_type , copy=False)
@@ -161,7 +161,7 @@ class InsertContext(BaseQueryContext):
                 self.column_formats[col_name] = 'int'
                 continue
             if ch_type.nullable:
-                if d_type == 'object':
+                if d_type_kind == 'O':
                     #  This is ugly, but the multiple replaces seem required as a result of this bug:
                     #  https://github.com/pandas-dev/pandas/issues/29024
                     df_col = df_col.replace({pd.NaT: None}).replace({np.nan: None})

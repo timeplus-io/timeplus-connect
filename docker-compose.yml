@@ -1,17 +1,17 @@
 services:
-  clickhouse:
-    image: 'clickhouse/clickhouse-server:${CLICKHOUSE_CONNECT_TEST_CH_VERSION-24.8-alpine}'
-    container_name: 'clickhouse-connect-clickhouse-server'
+  timeplus:
+    image: "timeplus/timeplusd:latest"
+    container_name: 'timeplus-connect-timeplus-server'
     ports:
+      - '8463:8463'
       - '8123:8123'
-      - '9000:9000'
+      - '3218:3218'
     ulimits:
       nofile:
         soft: 262144
         hard: 262144
     volumes:
-      - './.docker/clickhouse/single_node/config.xml:/etc/clickhouse-server/config.xml'
-      - './.docker/clickhouse/users.xml:/etc/clickhouse-server/users.xml'
+      - ./timeplusd:/var/lib/timeplusd
 
   clickhouse_tls:
     build:

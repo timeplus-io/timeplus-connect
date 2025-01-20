@@ -8,8 +8,7 @@ from timeplus_connect.driver import tzutil
 from timeplus_connect.datatypes.format import clear_all_formats
 
 os.environ['TZ'] = 'UTC'
-if os.name != 'nt': # windows without tzset 
-    time.tzset()
+time.tzset()
 
 
 @pytest.fixture(autouse=True)
