@@ -1,8 +1,8 @@
 import random
 import string
 
-from clickhouse_connect.driver import Client
-from clickhouse_connect.driver.exceptions import StreamClosedError, ProgrammingError, StreamFailureError
+from timeplus_connect.driver import Client
+from timeplus_connect.driver.exceptions import StreamClosedError, ProgrammingError, StreamFailureError
 
 
 def test_row_stream(test_client: Client):

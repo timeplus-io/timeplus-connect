@@ -1,4 +1,4 @@
-from clickhouse_connect.driver import Client, ProgrammingError
+from timeplus_connect.driver import Client, ProgrammingError
 
 
 def test_uint64_format(test_client: Client):

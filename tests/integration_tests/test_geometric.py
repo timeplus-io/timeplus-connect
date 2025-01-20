@@ -1,6 +1,6 @@
 from typing import Callable
 import pytest
-from clickhouse_connect.driver import Client
+from timeplus_connect.driver import Client
 
 @pytest.mark.skip("proton doesn't support geometric type")
 def test_point_column(test_client: Client, table_context: Callable):

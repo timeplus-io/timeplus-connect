@@ -1,4 +1,4 @@
-from clickhouse_connect.driver import Client
+from timeplus_connect.driver import Client
 
 
 def test_protocol_version(test_client: Client):

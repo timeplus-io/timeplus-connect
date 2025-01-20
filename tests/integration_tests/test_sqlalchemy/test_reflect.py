@@ -3,8 +3,8 @@ import sqlalchemy as db
 from sqlalchemy.engine import Engine
 import pytest
 
-from clickhouse_connect import common
-from clickhouse_connect.cc_sqlalchemy.datatypes.sqltypes import UInt32, SimpleAggregateFunction, Tuple
+from timeplus_connect import common
+from timeplus_connect.cc_sqlalchemy.datatypes.sqltypes import UInt32, SimpleAggregateFunction, Tuple
 
 
 def test_basic_reflection(test_engine: Engine):

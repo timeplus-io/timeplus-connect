@@ -1,6 +1,6 @@
 from sqlalchemy.engine import Engine
 
-from clickhouse_connect import common
+from timeplus_connect import common
 
 test_query = """
    -- 6dcd92a04feb50f14bbcf07c661680ba

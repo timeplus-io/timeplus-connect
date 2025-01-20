@@ -5,8 +5,8 @@ import time
 import random
 import proton_driver
 
-import clickhouse_connect
-from clickhouse_connect.tools.testing import TableContext
+import timeplus_connect
+from timeplus_connect.tools.testing import TableContext
 
 
 inserts = [#{'query': 'SELECT trip_id, pickup, dropoff, pickup_longitude, ' +

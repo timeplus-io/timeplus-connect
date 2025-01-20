@@ -7,12 +7,12 @@ from sqlalchemy.engine.base import Engine
 from sqlalchemy.ext.declarative import declarative_base
 
 from tests.integration_tests.conftest import TestConfig
-from clickhouse_connect import common
-from clickhouse_connect.cc_sqlalchemy.datatypes.sqltypes import Int8, UInt16, Decimal, Enum16, Float64, Boolean, \
+from timeplus_connect import common
+from timeplus_connect.cc_sqlalchemy.datatypes.sqltypes import Int8, UInt16, Decimal, Enum16, Float64, Boolean, \
     FixedString, String, UInt64, UUID, DateTime, DateTime64, LowCardinality, Nullable, Array, AggregateFunction, \
     UInt32, IPv4
-from clickhouse_connect.cc_sqlalchemy.ddl.custom import CreateDatabase, DropDatabase
-from clickhouse_connect.cc_sqlalchemy.ddl.tableengine import engine_map
+from timeplus_connect.cc_sqlalchemy.ddl.custom import CreateDatabase, DropDatabase
+from timeplus_connect.cc_sqlalchemy.ddl.tableengine import engine_map
 
 
 def test_create_database(test_engine: Engine, test_config: TestConfig, test_db: str):

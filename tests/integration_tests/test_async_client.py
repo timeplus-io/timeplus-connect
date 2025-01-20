@@ -8,9 +8,9 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from clickhouse_connect.driver.options import arrow
+from timeplus_connect.driver.options import arrow
 
-from clickhouse_connect.driver import AsyncClient
+from timeplus_connect.driver import AsyncClient
 
 
 @pytest.mark.asyncio
@@ -183,7 +183,6 @@ async def test_ping(test_async_client: AsyncClient):
 @pytest.mark.asyncio
 async def test_insert(test_async_client: AsyncClient, table_context: Callable):
     with table_context('test_async_client_insert', ['key uint32', 'value string']) as ctx:
-        print(ctx.table)
         await test_async_client.insert(ctx.table, [[42, 'str_0'], [144, 'str_1']], ['key', 'value'])
         result_set = (await test_async_client.query(
             f"SELECT * except _tp_time FROM {ctx.table} WHERE _tp_time > earliest_ts() ORDER BY key ASC LIMIT 2"

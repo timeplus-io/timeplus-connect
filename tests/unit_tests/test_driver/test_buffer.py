@@ -1,6 +1,6 @@
-from clickhouse_connect.driver.buffer import ResponseBuffer as PyResponseBuffer
-from clickhouse_connect.driver.exceptions import StreamCompleteException
-from clickhouse_connect.driverc.buffer import ResponseBuffer as CResponseBuffer  # pylint: disable=no-name-in-module
+from timeplus_connect.driver.buffer import ResponseBuffer as PyResponseBuffer
+from timeplus_connect.driver.exceptions import StreamCompleteException
+from timeplus_connect.driverc.buffer import ResponseBuffer as CResponseBuffer  # pylint: disable=no-name-in-module
 from tests.helpers import bytes_source, to_bytes
 
 

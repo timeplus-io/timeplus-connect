@@ -2,7 +2,7 @@
 
 from datetime import datetime, timedelta
 
-from clickhouse_connect.driver.binding import finalize_query
+from timeplus_connect.driver.binding import finalize_query
 
 select_template = """
   SELECT

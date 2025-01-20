@@ -6,12 +6,12 @@ from typing import Iterator, NamedTuple, Sequence, Optional, Callable
 
 from pytest import fixture
 
-from clickhouse_connect import common
-from clickhouse_connect.driver.common import coerce_bool
-from clickhouse_connect.driver.exceptions import OperationalError
-from clickhouse_connect.tools.testing import TableContext
-from clickhouse_connect.driver.httpclient import HttpClient
-from clickhouse_connect.driver import AsyncClient, Client, create_client
+from timeplus_connect import common
+from timeplus_connect.driver.common import coerce_bool
+from timeplus_connect.driver.exceptions import OperationalError
+from timeplus_connect.tools.testing import TableContext
+from timeplus_connect.driver.httpclient import HttpClient
+from timeplus_connect.driver import AsyncClient, Client, create_client
 from tests.helpers import PROJECT_ROOT_DIR
 
 

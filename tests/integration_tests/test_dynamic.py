@@ -5,8 +5,8 @@ from uuid import UUID
 
 import pytest
 
-from clickhouse_connect.datatypes.format import set_write_format
-from clickhouse_connect.driver import Client
+from timeplus_connect.datatypes.format import set_write_format
+from timeplus_connect.driver import Client
 
 
 def type_available(test_client: Client, data_type: str):

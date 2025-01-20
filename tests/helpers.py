@@ -6,12 +6,12 @@ from typing import Sequence, Union, Type
 import math
 import pytz
 
-from clickhouse_connect.datatypes.base import TimeplusType
-from clickhouse_connect.datatypes.registry import get_from_name
-from clickhouse_connect.tools.datagen import random_col_data, random_ascii_str, RandomValueDef
-from clickhouse_connect.driver.insert import InsertContext
-from clickhouse_connect.driver.transform import NativeTransform
-from clickhouse_connect.driverc.buffer import ResponseBuffer  # pylint: disable=no-name-in-module
+from timeplus_connect.datatypes.base import TimeplusType
+from timeplus_connect.datatypes.registry import get_from_name
+from timeplus_connect.tools.datagen import random_col_data, random_ascii_str, RandomValueDef
+from timeplus_connect.driver.insert import InsertContext
+from timeplus_connect.driver.transform import NativeTransform
+from timeplus_connect.driverc.buffer import ResponseBuffer  # pylint: disable=no-name-in-module
 
 PROJECT_ROOT_DIR = Path(__file__).parent.parent
 

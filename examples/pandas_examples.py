@@ -1,7 +1,7 @@
 #!/usr/bin/env python3 -u
 
 import pandas as pd
-import clickhouse_connect
+import timeplus_connect
 
 
 create_table_sql = """
@@ -16,7 +16,7 @@ CREATE STREAM pandas_example
 
 
 def write_pandas_df():
-    client = clickhouse_connect.get_client(host='localhost', port='3218', user='default', password= '')
+    client = timeplus_connect.get_client(host='localhost', port='3218', user='default', password='')
     client.command('DROP STREAM IF EXISTS pandas_example')
     client.command(create_table_sql)
     df = pd.DataFrame({'timeseries': ['04/03/2022 10:00:11', '05/03/2022 11:15:44', '06/03/2022 17:14:00'],

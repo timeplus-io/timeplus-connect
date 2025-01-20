@@ -2,7 +2,7 @@ from pathlib import Path
 from typing import Callable
 from time import sleep
 
-from clickhouse_connect.driver import Client
+from timeplus_connect.driver import Client
 
 
 def test_raw_insert(test_client: Client, table_context: Callable):

@@ -9,9 +9,9 @@ from ipaddress import IPv6Address
 from typing import List
 from time import sleep
 
-import clickhouse_connect
-from clickhouse_connect.datatypes.format import set_default_formats
-from clickhouse_connect.driver.client import Client
+import timeplus_connect
+from timeplus_connect.datatypes.format import set_default_formats
+from timeplus_connect.driver.client import Client
 
 columns = {
     'int8': ('int8', -44),
@@ -96,7 +96,7 @@ def main():
                 sys.exit()
     else:
         col_names = standard_cols
-    client = clickhouse_connect.get_client(compress=False)
+    client = timeplus_connect.get_client(compress=False)
     client.command('DROP STREAM IF EXISTS test_low_card_dict')
     client.command('CREATE STREAM test_low_card_dict (key int32, lc low_cardinality(string))')
     data = [[x, str(x)] for x in range(30000)]

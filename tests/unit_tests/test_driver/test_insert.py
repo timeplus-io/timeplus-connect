@@ -1,9 +1,9 @@
 import datetime
 
-from clickhouse_connect.datatypes.registry import get_from_name
+from timeplus_connect.datatypes.registry import get_from_name
 
-from clickhouse_connect.driver.insert import InsertContext
-from clickhouse_connect.tools.datagen import fixed_len_ascii_str
+from timeplus_connect.driver.insert import InsertContext
+from timeplus_connect.tools.datagen import fixed_len_ascii_str
 
 
 def test_block_size():

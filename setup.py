@@ -9,7 +9,7 @@ try:
     from Cython import __version__ as cython_version
 
     print(f'Using Cython {cython_version} to build cython modules')
-    c_modules = cythonize('clickhouse_connect/driverc/*.pyx', language_level='3str')
+    c_modules = cythonize('timeplus_connect/driverc/*.pyx', language_level='3str')
 except ImportError as ex:
     print('Cython Install Failed, Not Building C Extensions: ', ex)
     cythonize = None
@@ -35,24 +35,24 @@ def run_setup(try_c: bool = True):
         with open(os.path.join(project_dir, '.dev_version'), encoding='utf-8') as version_file:
             version = version_file.readline()
     else:
-        with open(os.path.join(project_dir, 'clickhouse_connect', '__version__.py'), encoding='utf-8') as version_file:
+        with open(os.path.join(project_dir, 'timeplus_connect', '__version__.py'), encoding='utf-8') as version_file:
             file_version = version_file.read().strip()
             match = re.search(r"version\s*=\s*'(.+)'", file_version)
             if match is None:
-                raise ValueError(f'invalid version {file_version} in clickhouse_connect/__version__.py')
+                raise ValueError(f'invalid version {file_version} in timeplus_connect/__version__.py')
             version = match.group(1)
 
     setup(
-        name='clickhouse-connect',
-        author='ClickHouse Inc.',
+        name='timeplus-connect',
+        author='Timeplus Inc.',
         author_email='clients@clickhouse.com',
-        keywords=['clickhouse', 'superset', 'sqlalchemy', 'http', 'driver'],
-        description='ClickHouse Database Core Driver for Python, Pandas, and Superset',
+        keywords=['timeplus', 'superset', 'sqlalchemy', 'http', 'driver'],
+        description='Timeplus Database Core Driver for Python, Pandas, and Superset',
         version=version,
         long_description=long_desc,
         long_description_content_type='text/markdown',
-        package_data={'clickhouse_connect': ['VERSION', 'py.typed']},
-        url='https://github.com/ClickHouse/clickhouse-connect',
+        package_data={'timeplus_connect': ['VERSION', 'py.typed']},
+        url='https://github.com/timeplus-io/timeplus-connect',
         packages=find_packages(exclude=['tests*']),
         python_requires='~=3.8',
         license='Apache License 2.0',
@@ -73,8 +73,8 @@ def run_setup(try_c: bool = True):
         },
         tests_require=['pytest'],
         entry_points={
-            'sqlalchemy.dialects': ['clickhousedb.connect=clickhouse_connect.cc_sqlalchemy.dialect:ClickHouseDialect',
-                                    'clickhousedb=clickhouse_connect.cc_sqlalchemy.dialect:ClickHouseDialect']
+            'sqlalchemy.dialects': ['timeplusdb.connect=timeplus_connect.cc_sqlalchemy.dialect:ClickHouseDialect',
+                                    'timeplusdb=timeplus_connect.cc_sqlalchemy.dialect:ClickHouseDialect']
         },
         classifiers=[
             'Development Status :: 4 - Beta',

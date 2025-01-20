@@ -4,10 +4,10 @@ import os
 import random
 from typing import Callable
 import pytest
-from clickhouse_connect.driver.exceptions import ProgrammingError
+from timeplus_connect.driver.exceptions import ProgrammingError
 
-from clickhouse_connect.driver import Client
-from clickhouse_connect.driver.options import np
+from timeplus_connect.driver import Client
+from timeplus_connect.driver.options import np
 from tests.helpers import list_equal, random_query
 from tests.integration_tests.datasets import basic_ds, basic_ds_columns, basic_ds_types, basic_ds_types_ver19, \
     null_ds, null_ds_columns, null_ds_types, dt_ds, dt_ds_columns, dt_ds_types

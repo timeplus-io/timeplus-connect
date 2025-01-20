@@ -1,6 +1,6 @@
-import clickhouse_connect
+import timeplus_connect
 
-client: clickhouse_connect.driver.Client
+client: timeplus_connect.driver.Client
 
 
 def inserted_nested_flat():

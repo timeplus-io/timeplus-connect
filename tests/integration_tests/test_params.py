@@ -2,8 +2,8 @@ from datetime import datetime, date
 from typing import Callable
 from time import sleep
 
-from clickhouse_connect.driver import Client
-from clickhouse_connect.driver.binding import DT64Param
+from timeplus_connect.driver import Client
+from timeplus_connect.driver.binding import DT64Param
 
 
 def test_params(test_client: Client, table_context: Callable):

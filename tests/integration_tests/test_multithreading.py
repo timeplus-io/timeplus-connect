@@ -2,8 +2,8 @@ import threading
 
 import pytest
 
-from clickhouse_connect.driver import Client
-from clickhouse_connect.driver.exceptions import ProgrammingError
+from timeplus_connect.driver import Client
+from timeplus_connect.driver.exceptions import ProgrammingError
 from tests.integration_tests.conftest import TestConfig
 
 

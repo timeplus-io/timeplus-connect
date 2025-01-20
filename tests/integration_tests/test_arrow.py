@@ -5,8 +5,8 @@ from time import sleep
 
 import pytest
 
-from clickhouse_connect.driver import Client
-from clickhouse_connect.driver.options import arrow
+from timeplus_connect.driver import Client
+from timeplus_connect.driver.options import arrow
 
 
 def test_arrow(test_client: Client, table_context: Callable):

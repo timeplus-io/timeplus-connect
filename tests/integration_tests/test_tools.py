@@ -2,8 +2,8 @@ from pathlib import Path
 from typing import Callable
 from time import sleep
 
-from clickhouse_connect.driver import Client
-from clickhouse_connect.driver.tools import insert_file
+from timeplus_connect.driver import Client
+from timeplus_connect.driver.tools import insert_file
 from tests.integration_tests.conftest import TestConfig
 
 

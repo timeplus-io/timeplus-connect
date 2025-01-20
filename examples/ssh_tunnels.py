@@ -1,7 +1,7 @@
 #!/usr/bin/env python -u
 import os
 
-import clickhouse_connect
+import timeplus_connect
 
 
 #  You can use an -L ssh tunnel directly, but to avoid HTTPS certificate errors you must add the
@@ -63,18 +63,18 @@ def create_tunnel():
 #  Documentation for the SocksProxyManager here:  https://urllib3.readthedocs.io/en/stable/reference/contrib/socks.html
 #  Note there are limitations for the urllib3 SOCKSProxyManager,
 from urllib3.contrib.socks import SOCKSProxyManager  # pylint: disable=wrong-import-position,wrong-import-order
-from clickhouse_connect.driver import httputil  # pylint: disable=wrong-import-position
+from timeplus_connect.driver import httputil  # pylint: disable=wrong-import-position
 
 
 def socks_proxy():
     options = httputil.get_pool_manager_options()
     proxy_manager = SOCKSProxyManager('socks5h://localhost:1443', **options)
 
-    client = clickhouse_connect.get_client(host='play.clickhouse.com',
-                                           user='play',
-                                           password='clickhouse',
-                                           port=443,
-                                           pool_mgr=proxy_manager)
+    client = timeplus_connect.get_client(host='play.clickhouse.com',
+                                         user='play',
+                                         password='clickhouse',
+                                         port=443,
+                                         pool_mgr=proxy_manager)
 
     print(client.query('SHOW DATABASES').result_set)
     client.close()

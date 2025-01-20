@@ -1,9 +1,9 @@
 import sqlalchemy as db
 from sqlalchemy.sql.ddl import CreateTable
 
-from clickhouse_connect.cc_sqlalchemy.datatypes.sqltypes import UInt64, UInt32, DateTime
-from clickhouse_connect.cc_sqlalchemy.ddl.tableengine import ReplicatedMergeTree, ReplacingMergeTree
-from clickhouse_connect.cc_sqlalchemy.dialect import ClickHouseDialect
+from timeplus_connect.cc_sqlalchemy.datatypes.sqltypes import UInt64, UInt32, DateTime
+from timeplus_connect.cc_sqlalchemy.ddl.tableengine import ReplicatedMergeTree, ReplacingMergeTree
+from timeplus_connect.cc_sqlalchemy.dialect import ClickHouseDialect
 
 dialect = ClickHouseDialect()
 

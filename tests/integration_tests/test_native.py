@@ -7,10 +7,10 @@ from typing import Callable
 from time import sleep
 import pytest
 
-from clickhouse_connect.datatypes.format import set_default_formats, clear_default_format, set_read_format, \
+from timeplus_connect.datatypes.format import set_default_formats, clear_default_format, set_read_format, \
     set_write_format
-from clickhouse_connect.driver import Client
-from clickhouse_connect.driver.common import coerce_bool
+from timeplus_connect.driver import Client
+from timeplus_connect.driver.common import coerce_bool
 
 
 def test_low_card(test_client: Client, table_context: Callable):

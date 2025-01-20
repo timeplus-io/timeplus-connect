@@ -4,9 +4,9 @@ from typing import Callable
 
 import pytest
 
-from clickhouse_connect import create_client
-from clickhouse_connect.driver.client import Client
-from clickhouse_connect.driver.exceptions import DatabaseError
+from timeplus_connect import create_client
+from timeplus_connect.driver.client import Client
+from timeplus_connect.driver.exceptions import DatabaseError
 from tests.integration_tests.conftest import TestConfig
 
 CSV_CONTENT = """abc,1,1
@@ -85,7 +85,7 @@ def test_session_params(test_config: TestConfig):
 
 def test_dsn_config(test_config: TestConfig):
     session_id = 'TEST_DSN_SESSION_' + test_config.test_database
-    dsn = (f'clickhousedb://{test_config.username}:{test_config.password}@{test_config.host}:{test_config.port}' +
+    dsn = (f'timeplusdb://{test_config.username}:{test_config.password}@{test_config.host}:{test_config.port}' +
            f'/{test_config.test_database}?session_id={session_id}&show_clickhouse_errors=false')
     client = create_client(dsn=dsn)
     assert client.get_client_setting('session_id') == session_id

@@ -2,9 +2,9 @@ from pathlib import Path
 
 import pytest
 
-from clickhouse_connect.driver import Client
-from clickhouse_connect.driver.external import ExternalData
-from clickhouse_connect.driver.options import arrow
+from timeplus_connect.driver import Client
+from timeplus_connect.driver.external import ExternalData
+from timeplus_connect.driver.options import arrow
 from tests.integration_tests.conftest import TestConfig
 
 ext_settings = {'input_format_allow_errors_num': 10, 'input_format_allow_errors_ratio': .2}

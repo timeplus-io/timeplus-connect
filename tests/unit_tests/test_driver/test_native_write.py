@@ -1,6 +1,6 @@
-from clickhouse_connect.driver.exceptions import ProgrammingError
+from timeplus_connect.driver.exceptions import ProgrammingError
 
-from clickhouse_connect.datatypes.registry import get_from_name
+from timeplus_connect.datatypes.registry import get_from_name
 from tests.helpers import to_bytes, native_insert_block
 from tests.unit_tests.test_driver.binary import NESTED_BINARY
 

@@ -7,9 +7,9 @@ from time import sleep
 
 import pytest
 
-from clickhouse_connect.driver import Client
-from clickhouse_connect.driver.exceptions import DataError
-from clickhouse_connect.driver.options import np, pd
+from timeplus_connect.driver import Client
+from timeplus_connect.driver.exceptions import DataError
+from timeplus_connect.driver.options import np, pd
 from tests.helpers import random_query
 from tests.integration_tests.conftest import TestConfig
 from tests.integration_tests.datasets import null_ds, null_ds_columns, null_ds_types

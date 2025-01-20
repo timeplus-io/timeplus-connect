@@ -1,4 +1,4 @@
-from clickhouse_connect import common
+from timeplus_connect import common
 
 
 def test_setting():

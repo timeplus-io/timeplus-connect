@@ -4,7 +4,7 @@ from datetime import datetime
 
 import pytz
 
-from clickhouse_connect.driver import Client, tzutil
+from timeplus_connect.driver import Client, tzutil
 
 # We have to localize a datetime from a timezone to get a current, sensible timezone object for testing.  See
 # https://stackoverflow.com/questions/35462876/python-pytz-timezone-function-returns-a-timezone-that-is-off-by-9-minutes

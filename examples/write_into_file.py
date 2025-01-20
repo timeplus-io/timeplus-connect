@@ -1,4 +1,4 @@
-import clickhouse_connect
+import timeplus_connect
 
 if __name__ == '__main__':
     client = timeplus_connect.get_client()
