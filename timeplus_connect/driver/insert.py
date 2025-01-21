@@ -148,10 +148,10 @@ class InsertContext(BaseQueryContext):
         data = []
         for df_col_name, col_name, ch_type in zip(df.columns, self.column_names, self.column_types):
             df_col = df[df_col_name]
-            d_type_kind = str(df_col.dtype)
+            d_type_kind = df_col.dtype.kind
             if ch_type.python_type == int:
                 if d_type_kind == 'f':
-                    df_col = df_col.round().astype(ch_type.pd_type , copy=False)
+                    df_col = df_col.round().astype(ch_type.pd_type, copy=False)
                 elif d_type_kind in ('i', 'u') and not df_col.hasnans:
                     data.append(df_col.to_list())
                     continue

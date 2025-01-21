@@ -111,6 +111,7 @@ class UInt64(IntBase):
 class BigInt(TimeplusType, registered=False):
     _signed = True
     valid_formats = 'string', 'native'
+    python_type = int
 
     def __init_subclass__(cls,registered: bool = True):
         cls.pd_type = cls.__name__
