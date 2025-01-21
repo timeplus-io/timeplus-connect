@@ -113,15 +113,3 @@ jobs:
           CLOUD_HOST: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_HOST }}
         if: "${{ env.CLOUD_HOST != '' }}"
         run: echo "HAS_SECRETS=true" >> $GITHUB_OUTPUT
-
-  # cloud-tests:
-  #   runs-on: ubuntu-latest
-  #   name: Cloud Tests Py=${{ matrix.python-version }}
-  #   needs: check-secret
-  #   if: needs.check-secret.outputs.has_secrets == 'true'
-
-  #   strategy:
-  #     matrix:
-  #       python-version:
-  #         - '3.10'
-  #         - '3.11'
