@@ -1,6 +1,6 @@
 services:
   timeplus:
-    image: "timeplus/timeplusd:latest"
+    image: "d.timeplus.com/timeplus-io/proton:latest"
     container_name: 'timeplus-connect-timeplus-server'
     ports:
       - '8463:8463'
@@ -11,7 +11,7 @@ services:
         soft: 262144
         hard: 262144
     volumes:
-      - ./timeplusd:/var/lib/timeplusd
+      - /mnt/timeplusd:/var/lib/timeplusd
 
   clickhouse_tls:
     build:

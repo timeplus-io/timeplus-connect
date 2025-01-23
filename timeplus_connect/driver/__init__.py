@@ -126,7 +126,7 @@ def create_client(*,
 
 def default_port(interface: str, secure: bool):
     if interface.startswith('http'):
-        return 8443 if secure else 8123
+        return 8443 if secure else 3218
     raise ValueError('Unrecognized ClickHouse interface')
 
 

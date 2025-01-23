@@ -1,3 +1,5 @@
+import pytest
+
 from timeplus_connect.datatypes.registry import get_from_name
 from timeplus_connect.driver.parser import parse_callable, parse_enum
 from timeplus_connect.driver.query import remove_sql_comments
@@ -28,6 +30,7 @@ def test_variant_type():
 
 
 def test_json_type():
+    pytest.skip("proton does not support new json type yet.")
     names = ['JSON',
              'JSON(max_dynamic_paths=100, a.b uint32, SKIP `a.e`)',
              "JSON(max_dynamic_types = 55, SKIP REGEXP 'a[efg]')",
