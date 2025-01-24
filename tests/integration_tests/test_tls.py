@@ -3,9 +3,9 @@ import os
 import pytest
 from urllib3.exceptions import SSLError
 
-from clickhouse_connect import get_client
-from clickhouse_connect.driver.common import coerce_bool
-from clickhouse_connect.driver.exceptions import OperationalError
+from timeplus_connect import get_client
+from timeplus_connect.driver.common import coerce_bool
+from timeplus_connect.driver.exceptions import OperationalError
 from tests.helpers import PROJECT_ROOT_DIR
 
 # See .docker/clickhouse/single_node_tls for the server configuration

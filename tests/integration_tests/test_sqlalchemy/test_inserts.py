@@ -6,29 +6,28 @@ from sqlalchemy.engine import Engine
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import Session
 
-from clickhouse_connect.cc_sqlalchemy.datatypes.sqltypes import LowCardinality, String, UInt64
-from clickhouse_connect.cc_sqlalchemy.ddl.tableengine import engine_map
-from clickhouse_connect.driver import Client
+from timeplus_connect.cc_sqlalchemy.datatypes.sqltypes import LowCardinality, String, UInt64
+from timeplus_connect.cc_sqlalchemy.ddl.tableengine import engine_map
 
 
 @fixture(scope='module', autouse=True, name='test_model')
-def test_model_fixture(test_client: Client, test_engine: Engine, test_db: str, test_table_engine: str):
-    if not test_client.min_version('22.6.1'):
-        yield None
-        return
+def test_model_fixture(test_engine: Engine, test_db: str, test_table_engine: str):
+    # if not test_client.min_version('22.6.1'):
+    #     yield None
+    #     return
     engine_cls = engine_map[test_table_engine]
 
     Base = declarative_base(metadata=MetaData(schema=test_db))  # pylint: disable=invalid-name
 
     class Model(Base):
         __tablename__ = 'insert_model'
-        __table_args__ = (engine_cls(order_by=['test_name', 'value_1']),)
+        __table_args__ = (engine_cls({'replication_factor': '1','shards': '1','shard_by_expr': 'rand()'}),)
         test_name = db.Column(LowCardinality(String), primary_key=True)
         value_1 = db.Column(String)
         metric_2 = db.Column(UInt64)
         description = db.Column(String)
 
-    test_engine.execute('DROP TABLE IF EXISTS insert_model')
+    test_engine.execute('DROP STREAM IF EXISTS insert_model')
     Base.metadata.create_all(test_engine)
     yield Model
 

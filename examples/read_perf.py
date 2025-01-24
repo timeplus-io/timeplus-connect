@@ -5,8 +5,8 @@ This script is for simple timed comparisons of various queries between formats (
 native types) based on data loaded into a local clickhouse instance from some ClickHouse Sample Datasets
 https://clickhouse.com/docs/en/getting-started/example-datasets/
 
-It includes some basic comparisons with clickhouse-driver.  The clickhouse-driver import and client can be
-commented out if clickhouse-driver is not installed
+It includes some basic comparisons with clickhouse-driver.  The proton-driver import and client can be
+commented out if proton-driver is not installed
 
 Uncomment the queries and formats to measure before running.
 
@@ -14,18 +14,18 @@ This script is not intended to be rigorous or scientific.  For entertainment pur
 """
 
 import time
-import clickhouse_driver  # pylint: disable=import-error
-import clickhouse_connect
+import proton_driver  # pylint: disable=import-error
+import timeplus_connect
 
 
 queries = [#'SELECT trip_id, pickup, dropoff, pickup_longitude, pickup_latitude FROM taxis',
            #'SELECT number from numbers(500000000)',
-           'SELECT * FROM datasets.hits_100m_obfuscated LIMIT 2000000',
+           'SELECT * FROM hits_100m_obfuscated LIMIT 2000000',
            #"SELECT * FROM perftest.ontime WHERE FlightDate < '2017-02-18'"
            ]
 
-cc_client = clickhouse_connect.get_client(compress=False)
-cd_client = clickhouse_driver.Client(host='localhost')
+cc_client = timeplus_connect.get_client(compress=False)
+cd_client = proton_driver.Client(host='localhost')
 
 
 def read_python_columns(query):

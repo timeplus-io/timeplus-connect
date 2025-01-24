@@ -3,7 +3,7 @@ name: 'Lint and Test'
 on:
   pull_request:
     branches:
-      - main
+      - timeplus
     paths-ignore:
       - 'VERSION'
       - 'LICENSE'
@@ -19,7 +19,7 @@ on:
       - '*_dev'
       - '*_build'
       - 'release_*'
-      - main
+      - timeplus
     paths-ignore:
       - 'VERSION'
       - 'LICENSE'
@@ -49,7 +49,7 @@ jobs:
           python setup.py build_ext --inplace
       - name: Run Pylint
         run: |
-          pylint clickhouse_connect
+          pylint timeplus_connect
           pylint tests
           pylint examples
 
@@ -64,22 +64,17 @@ jobs:
           - '3.11'
           - '3.12'
           - '3.13'
-        clickhouse-version:
-          - '24.3'
-          - '24.8'
-          - '24.9'
-          - '24.10'
-          - '24.11'
+        timeplus-version:
           - latest
 
-    name: Local Tests Py=${{ matrix.python-version }} CH=${{ matrix.clickhouse-version }}
+    name: Local Tests Py=${{ matrix.python-version }} TP=${{ matrix.timeplus-version }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Start ClickHouse (version - ${{ matrix.clickhouse-version }}) in Docker
+      - name: Start Timeplus (version - ${{ matrix.timeplus-version }}) in Docker
         uses: hoverkraft-tech/compose-action@v2.0.0
         env:
-          CLICKHOUSE_CONNECT_TEST_CH_VERSION: ${{ matrix.clickhouse-version }}
+          TIMEPLUS_CONNECT_TEST_TP_VERSION: ${{ matrix.timeplus-version }}
         with:
           compose-file: 'docker-compose.yml'
           down-flags: '--volumes'
@@ -98,9 +93,10 @@ jobs:
       - name: Add ClickHouse TLS instance to /etc/hosts
         run: |
           sudo echo "127.0.0.1 server1.clickhouse.test" | sudo tee -a /etc/hosts
+          df -h
       - name: Run tests
         env:
-          CLICKHOUSE_CONNECT_TEST_TLS: 1
+          # CLICKHOUSE_CONNECT_TEST_TLS: 1
           CLICKHOUSE_CONNECT_TEST_DOCKER: 'False'
           CLICKHOUSE_CONNECT_TEST_FUZZ: 50
           SQLALCHEMY_SILENCE_UBER_WARNING: 1
@@ -118,40 +114,40 @@ jobs:
         if: "${{ env.CLOUD_HOST != '' }}"
         run: echo "HAS_SECRETS=true" >> $GITHUB_OUTPUT
 
-  cloud-tests:
-    runs-on: ubuntu-latest
-    name: Cloud Tests Py=${{ matrix.python-version }}
-    needs: check-secret
-    if: needs.check-secret.outputs.has_secrets == 'true'
+  # cloud-tests:
+  #   runs-on: ubuntu-latest
+  #   name: Cloud Tests Py=${{ matrix.python-version }}
+  #   needs: check-secret
+  #   if: needs.check-secret.outputs.has_secrets == 'true'
 
-    strategy:
-      matrix:
-        python-version:
-          - '3.10'
-          - '3.11'
+  #   strategy:
+  #     matrix:
+  #       python-version:
+  #         - '3.10'
+  #         - '3.11'
 
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-      - name: Set up Python ${{ matrix.python-version }}
-        uses: actions/setup-python@v5
-        with:
-          python-version: ${{ matrix.python-version }}
-      - name: Install dependencies
-        run: |
-          python -m pip install --upgrade pip
-          pip install -r tests/test_requirements.txt
-      - name: Build cython extensions
-        run: python setup.py build_ext --inplace
-      - name: "Add distribution info"  #  This lets SQLAlchemy find entry points
-        run: python setup.py develop
-      - name: Run tests
-        env:
-          CLICKHOUSE_CONNECT_TEST_FUZZ: 10
-          CLICKHOUSE_CONNECT_TEST_CLOUD: 'True'
-          CLICKHOUSE_CONNECT_TEST_PORT: 8443
-          CLICKHOUSE_CONNECT_TEST_HOST: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_HOST_SMT }}
-          CLICKHOUSE_CONNECT_TEST_PASSWORD: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_PASSWORD_SMT }}
-          CLICKHOUSE_CONNECT_TEST_JWT_SECRET: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_JWT_PRIVATE_KEY }}
-          SQLALCHEMY_SILENCE_UBER_WARNING: 1
-        run: pytest tests/integration_tests
+  #   steps:
+  #     - name: Checkout
+  #       uses: actions/checkout@v4
+  #     - name: Set up Python ${{ matrix.python-version }}
+  #       uses: actions/setup-python@v5
+  #       with:
+  #         python-version: ${{ matrix.python-version }}
+  #     - name: Install dependencies
+  #       run: |
+  #         python -m pip install --upgrade pip
+  #         pip install -r tests/test_requirements.txt
+  #     - name: Build cython extensions
+  #       run: python setup.py build_ext --inplace
+  #     - name: "Add distribution info"  #  This lets SQLAlchemy find entry points
+  #       run: python setup.py develop
+  #     - name: Run tests
+  #       env:
+  #         CLICKHOUSE_CONNECT_TEST_FUZZ: 10
+  #         CLICKHOUSE_CONNECT_TEST_CLOUD: 'True'
+  #         CLICKHOUSE_CONNECT_TEST_PORT: 8443
+  #         CLICKHOUSE_CONNECT_TEST_HOST: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_HOST_SMT }}
+  #         CLICKHOUSE_CONNECT_TEST_PASSWORD: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_PASSWORD_SMT }}
+  #         CLICKHOUSE_CONNECT_TEST_JWT_SECRET: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_JWT_PRIVATE_KEY }}
+  #         SQLALCHEMY_SILENCE_UBER_WARNING: 1
+  #       run: pytest tests/integration_tests

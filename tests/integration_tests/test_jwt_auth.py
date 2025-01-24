@@ -1,10 +1,11 @@
 from datetime import datetime, timezone, timedelta
 from os import environ
 
+# pylint: disable=no-member
 import jwt
 import pytest
 
-from clickhouse_connect.driver import create_client, ProgrammingError, create_async_client
+from timeplus_connect.driver import create_client, ProgrammingError, create_async_client
 from tests.integration_tests.conftest import TestConfig
 
 

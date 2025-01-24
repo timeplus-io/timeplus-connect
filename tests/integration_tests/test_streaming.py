@@ -1,8 +1,8 @@
 import random
 import string
 
-from clickhouse_connect.driver import Client
-from clickhouse_connect.driver.exceptions import StreamClosedError, ProgrammingError, StreamFailureError
+from timeplus_connect.driver import Client
+from timeplus_connect.driver.exceptions import StreamClosedError, ProgrammingError, StreamFailureError
 
 
 def test_row_stream(test_client: Client):
@@ -20,7 +20,7 @@ def test_row_stream(test_client: Client):
 
 
 def test_column_block_stream(test_client: Client):
-    random_string = 'randomStringUTF8(50)'
+    random_string = 'random_string_utf8(50)'
     if not test_client.min_version('20'):
         random_string = random.choices(string.ascii_lowercase, k=50)
     block_stream = test_client.query_column_block_stream(f'SELECT number, {random_string} FROM numbers(10000)',
@@ -36,7 +36,7 @@ def test_column_block_stream(test_client: Client):
 
 
 def test_row_block_stream(test_client: Client):
-    random_string = 'randomStringUTF8(50)'
+    random_string = 'random_string_utf8(50)'
     if not test_client.min_version('20'):
         random_string = random.choices(string.ascii_lowercase, k=50)
     block_stream = test_client.query_row_block_stream(f'SELECT number, {random_string} FROM numbers(10000)',
@@ -68,8 +68,8 @@ def test_stream_errors(test_client: Client):
 
 
 def test_stream_failure(test_client: Client):
-    with test_client.query_row_block_stream('SELECT toString(cityHash64(number)) FROM numbers(10000000)' +
-                                            ' where intDiv(1,number-300000)>-100000000') as stream:
+    with test_client.query_row_block_stream('SELECT to_string(city_hash64(number)) FROM numbers(10000000)' +
+                                            ' where int_div(1,number-300000)>-100000000') as stream:
         blocks = 0
         failed = False
         try:

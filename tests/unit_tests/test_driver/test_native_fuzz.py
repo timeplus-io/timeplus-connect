@@ -1,10 +1,10 @@
 import os
 import random
 
-from clickhouse_connect.datatypes.registry import get_from_name
-from clickhouse_connect.driver.common import coerce_bool
-from clickhouse_connect.driver.buffer import ResponseBuffer as PyBuff
-from clickhouse_connect.driverc.buffer import ResponseBuffer as CBuff  # pylint: disable=no-name-in-module
+from timeplus_connect.datatypes.registry import get_from_name
+from timeplus_connect.driver.common import coerce_bool
+from timeplus_connect.driver.buffer import ResponseBuffer as PyBuff
+from timeplus_connect.driverc.buffer import ResponseBuffer as CBuff  # pylint: disable=no-name-in-module
 from tests.helpers import random_columns, random_data, native_transform, native_insert_block, bytes_source
 
 TEST_COLUMNS = 12
@@ -23,7 +23,7 @@ def test_native_round_trips():
         col_names, col_types = random_columns(TEST_COLUMNS)
         data = random_data(col_types, data_rows)
         col_names = ('row_id',) + col_names
-        col_types = (get_from_name('UInt32'),) + col_types
+        col_types = (get_from_name('uint32'),) + col_types
         assert len(data) == data_rows
         output = native_insert_block(data, column_names=col_names, column_types=col_types)
         data_result = native_transform.parse_response(bytes_source(output, cls=BuffCls))
@@ -41,7 +41,7 @@ def test_native_small():
         col_names, col_types = random_columns(1)
         data = random_data(col_types, 2)
         col_names = ('row_id',) + col_names
-        col_types = (get_from_name('UInt32'),) + col_types
+        col_types = (get_from_name('uint32'),) + col_types
         output = native_insert_block(data, column_names=col_names, column_types=col_types)
         data_result = native_transform.parse_response(bytes_source(output, cls=BuffCls))
         assert data_result.column_names == col_names

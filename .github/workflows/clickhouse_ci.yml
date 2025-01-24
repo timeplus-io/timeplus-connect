@@ -1,4 +1,4 @@
-name: ClickHouse CI Tests
+name: Timeplus CI Tests
 
 on:
   workflow_dispatch:
@@ -8,7 +8,7 @@ on:
 jobs:
   head:
     runs-on: ubuntu-latest
-    name: ClickHouse CI Tests
+    name: Timeplus CI Tests
     env:
       CLICKHOUSE_CONNECT_TEST_DOCKER: 'False'
       CLICKHOUSE_CONNECT_TEST_FUZZ: 50
@@ -28,17 +28,17 @@ jobs:
       - name: "Add distribution info"  #  This lets SQLAlchemy find entry points
         run: python setup.py develop
 
-      - name: run ClickHouse Cloud tests
-        env:
-          CLICKHOUSE_CONNECT_TEST_PORT: 8443
-          CLICKHOUSE_CONNECT_TEST_CLOUD: 'True'
-          CLICKHOUSE_CONNECT_TEST_HOST: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_HOST_SMT }}
-          CLICKHOUSE_CONNECT_TEST_PASSWORD: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_PASSWORD_SMT }}
-          CLICKHOUSE_CONNECT_TEST_JWT_SECRET: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_JWT_PRIVATE_KEY }}
-        run: pytest tests/integration_tests
+      # - name: run ClickHouse Cloud tests
+      #   env:
+      #     CLICKHOUSE_CONNECT_TEST_PORT: 3218
+      #     CLICKHOUSE_CONNECT_TEST_CLOUD: 'True'
+      #     CLICKHOUSE_CONNECT_TEST_HOST: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_HOST_SMT }}
+      #     CLICKHOUSE_CONNECT_TEST_PASSWORD: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_PASSWORD_SMT }}
+      #     CLICKHOUSE_CONNECT_TEST_JWT_SECRET: ${{ secrets.INTEGRATIONS_TEAM_TESTS_CLOUD_JWT_PRIVATE_KEY }}
+      #   run: pytest tests/integration_tests
 
-      - name: Run ClickHouse Container (LATEST)
-        run: CLICKHOUSE_CONNECT_TEST_CH_VERSION=latest docker compose up -d clickhouse
+      - name: Run Timeplus Container (LATEST)
+        run: TIMEPLUS_CONNECT_TEST_TP_VERSION=latest docker compose up -d timeplus
       - name: Run LATEST tests
         run: pytest tests/integration_tests
       - name: remove latest container

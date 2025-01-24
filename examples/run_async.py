@@ -21,7 +21,7 @@ Completed query 8, elapsed ms since start: 10011
 import asyncio
 from datetime import datetime
 
-import clickhouse_connect
+import timeplus_connect
 
 QUERIES = 10
 SEMAPHORE = 2
@@ -29,7 +29,7 @@ SEMAPHORE = 2
 
 async def concurrent_queries():
     test_query = "SELECT sleep(2)"
-    client = await clickhouse_connect.get_async_client()
+    client = await timeplus_connect.get_async_client()
 
     start = datetime.now()
 

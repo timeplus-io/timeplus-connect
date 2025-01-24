@@ -1,18 +1,17 @@
 import sys
 import os
-import random
 import time
 from subprocess import Popen, PIPE
 from typing import Iterator, NamedTuple, Sequence, Optional, Callable
 
 from pytest import fixture
 
-from clickhouse_connect import common
-from clickhouse_connect.driver.common import coerce_bool
-from clickhouse_connect.driver.exceptions import OperationalError
-from clickhouse_connect.tools.testing import TableContext
-from clickhouse_connect.driver.httpclient import HttpClient
-from clickhouse_connect.driver import AsyncClient, Client, create_client
+from timeplus_connect import common
+from timeplus_connect.driver.common import coerce_bool
+from timeplus_connect.driver.exceptions import OperationalError
+from timeplus_connect.tools.testing import TableContext
+from timeplus_connect.driver.httpclient import HttpClient
+from timeplus_connect.driver import AsyncClient, Client, create_client
 from tests.helpers import PROJECT_ROOT_DIR
 
 
@@ -39,14 +38,11 @@ def test_config_fixture() -> Iterator[TestConfig]:
     common.set_setting('max_connection_age', 15)  # Make sure resetting connections doesn't break stuff
     host = os.environ.get('CLICKHOUSE_CONNECT_TEST_HOST', 'localhost')
     docker = host == 'localhost' and coerce_bool(os.environ.get('CLICKHOUSE_CONNECT_TEST_DOCKER', 'False'))
-    port = int(os.environ.get('CLICKHOUSE_CONNECT_TEST_PORT', '0'))
-    if not port:
-        port = 8123
+    port = int(os.environ.get('CLICKHOUSE_CONNECT_TEST_PORT', '3218'))
     cloud = coerce_bool(os.environ.get('CLICKHOUSE_CONNECT_TEST_CLOUD', 'False'))
     username = os.environ.get('CLICKHOUSE_CONNECT_TEST_USER', 'default')
     password = os.environ.get('CLICKHOUSE_CONNECT_TEST_PASSWORD', '')
-    test_database = os.environ.get('CLICKHOUSE_CONNECT_TEST_DATABASE',
-                                   f'ch_connect__{random.randint(100000, 999999)}__{int(time.time() * 1000)}')
+    test_database = os.environ.get('CLICKHOUSE_CONNECT_TEST_DATABASE', 'default')
     compress = os.environ.get('CLICKHOUSE_CONNECT_TEST_COMPRESS', 'True')
     insert_quorum = int(os.environ.get('CLICKHOUSE_CONNECT_TEST_INSERT_QUORUM', '0'))
     proxy_address = os.environ.get('CLICKHOUSE_CONNECT_TEST_PROXY_ADDR', '')
@@ -88,7 +84,7 @@ def test_create_client_fixture(test_config: TestConfig) -> Callable:
 
 @fixture(scope='session', name='test_table_engine')
 def test_table_engine_fixture() -> Iterator[str]:
-    yield 'MergeTree'
+    yield 'Stream'
 
 
 # pylint: disable=too-many-branches
@@ -117,7 +113,8 @@ def test_client_fixture(test_config: TestConfig, test_create_client: Callable) -
         except OperationalError as ex:
             if tries > 10:
                 raise TestException('Failed to connect to ClickHouse server after 30 seconds') from ex
-            time.sleep(3)
+            # time.sleep(3)
+            break
     client.command(f'CREATE DATABASE IF NOT EXISTS {test_config.test_database}', use_database=False)
     yield client
 
@@ -142,7 +139,7 @@ def table_context_fixture(test_client: Client, test_table_engine: str):
                 order_by: Optional[str] = None,
                 **kwargs):
         if 'engine' not in kwargs:
-            kwargs['engine'] = test_table_engine
+            kwargs['engine'] = f"{test_table_engine}(1, 1, rand())"
         return TableContext(test_client,
                             table=table,
                             columns=columns,

@@ -3,9 +3,9 @@ import time
 import pytz
 import pytest
 
-from clickhouse_connect.driver import tzutil
+from timeplus_connect.driver import tzutil
 
-from clickhouse_connect.datatypes.format import clear_all_formats
+from timeplus_connect.datatypes.format import clear_all_formats
 
 os.environ['TZ'] = 'UTC'
 time.tzset()
