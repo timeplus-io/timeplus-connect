@@ -45,7 +45,7 @@ def run_setup(try_c: bool = True):
     setup(
         name='timeplus-connect',
         author='Timeplus Inc.',
-        author_email='clients@clickhouse.com',
+        author_email='eng@timeplus.com',
         keywords=['timeplus', 'superset', 'sqlalchemy', 'http', 'driver'],
         description='Timeplus Database Core Driver for Python, Pandas, and Superset',
         version=version,
