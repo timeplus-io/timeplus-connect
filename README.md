@@ -1,6 +1,6 @@
 ## Timeplus Connect
 
-This project provides Python connector to interact with Timeplus Enterprise or Timeplus Proton. The code is based on [clickhouse-connect](https://github.com/ClickHouse/clickhouse-connect).
+This project provides Python connector to interact with [Timeplus Enterprise](https://www.timeplus.com/product) or [Timeplus Proton](https://github.com/timeplus-io/proton). The code is based on [clickhouse-connect](https://github.com/ClickHouse/clickhouse-connect).
 
 A high performance database driver for connecting Timeplus to Python, Pandas, and Superset
 
@@ -10,7 +10,7 @@ A high performance database driver for connecting Timeplus to Python, Pandas, an
 * Superset Connector
 * SQLAlchemy 1.3 and 1.4 (limited feature set)
 
-Timeplus Connect currently uses the Timeplus HTTP interface for maximum compatibility.
+Timeplus Connect currently uses the Timeplus HTTP interface for maximum compatibility, defaulting to 8123.
 
 ### Installation
 
@@ -18,14 +18,14 @@ Timeplus Connect currently uses the Timeplus HTTP interface for maximum compatib
 pip install timeplus-connect
 ```
 
-Timeplus Connect requires Python 3.8 or higher.
+Timeplus Connect requires Python 3.9 or higher.
 
-### Superset Connectivity (to be verified)
+### Superset Connectivity (working-in-progress)
 
 Timeplus Connect is fully integrated with Apache Superset.
 
-When creating a Superset Data Source, either use the provided connection dialog, or a SqlAlchemy DSN in the form
-`timeplusdb://{username}:{password}@{host}:{port}`.
+When creating a Superset Data Source, use a SqlAlchemy DSN in the form
+`timeplusdb://{username}:{password}@{host}:{port}`, such as `timeplusdb://default:password@localhost:8123`.
 
 ### SQLAlchemy Implementation (to be verified)
 
