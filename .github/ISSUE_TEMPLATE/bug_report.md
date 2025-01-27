@@ -19,21 +19,21 @@ assignees: ''
 
 ### Code example
 ```python
-import clickhouse_connect
+import timeplus_connect
 ```
 
-### clickhouse-connect and/or ClickHouse server logs
+### timeplus-connect and/or Timeplus server logs
 
 ### Configuration
 #### Environment
-* clickhouse-connect version:
+* timeplus-connect version:
 * Python version:
 * Operating system:
 
 
-#### ClickHouse server
-* ClickHouse Server version:
-* ClickHouse Server non-default settings, if any:
-* `CREATE TABLE` statements for tables involved:
-* Sample data for these tables, use [clickhouse-obfuscator](https://github.com/ClickHouse/ClickHouse/blob/master/programs/obfuscator/Obfuscator.cpp#L42-L80) if necessary
+#### Timeplus server
+* Timeplus Server version:
+* Timeplus Server non-default settings, if any:
+* `CREATE STREAM` statements for tables involved:
+* Sample data
 
