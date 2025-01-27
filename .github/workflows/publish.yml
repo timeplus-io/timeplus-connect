@@ -6,9 +6,9 @@ on:
       publish_type:
         description: Publish Type
         type: choice
-        default: test
+        default: release
         options:
-          - test
+          # - test
           - release
           - build
 env:
@@ -135,8 +135,8 @@ jobs:
       - build_x86_musllinux_wheels
       - build_x86_manylinux_wheels
       - build_aarch64_musllinux_wheels
-      - build_aarch64_manylinux_wheels
-      - build_aarch64_pypy_wheels
+      # - build_aarch64_manylinux_wheels
+      # - build_aarch64_pypy_wheels
     name: Publish to PyPI
     runs-on: ubuntu-latest
     if: ${{ inputs.publish_type != 'build' }}
