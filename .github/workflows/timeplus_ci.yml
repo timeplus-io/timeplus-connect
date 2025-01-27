@@ -2,8 +2,8 @@ name: Timeplus CI Tests
 
 on:
   workflow_dispatch:
-  schedule:
-    - cron: '34 17 * * *'
+  # schedule:
+  #   - cron: '34 17 * * *'
 
 jobs:
   head:
