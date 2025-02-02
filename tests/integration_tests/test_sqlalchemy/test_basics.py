@@ -53,7 +53,7 @@ def test_execute(test_engine: Engine):
         assert len(rows) == 2
 
         rows = list(row for row in conn.execute('DROP STREAM IF EXISTS dummy_table'))
-        assert rows[0][0] == 0
+        assert len(rows) > 0  # This is just the metadata from the "command" QueryResult
 
         rows = list(row for row in conn.execute('DESCRIBE dummy'))
         assert len(rows) == 3
