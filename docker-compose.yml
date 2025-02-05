@@ -1,11 +1,11 @@
 services:
   timeplus:
     image: "d.timeplus.com/timeplus-io/proton:latest"
-    container_name: 'timeplus-connect-timeplus-server'
+    container_name: "timeplus-connect-timeplus-server"
     ports:
-      - '8463:8463'
-      - '8123:8123'
-      - '3218:3218'
+      - "8463:8463"
+      - "8123:8123"
+      - "3218:3218"
     ulimits:
       nofile:
         soft: 262144
@@ -17,14 +17,16 @@ services:
     build:
       context: ./
       dockerfile: .docker/clickhouse/single_node_tls/Dockerfile
-    container_name: 'clickhouse-connect-clickhouse-server-tls'
+    container_name: "clickhouse-connect-clickhouse-server-tls"
+    environment:
+      CLICKHOUSE_SKIP_USER_SETUP: 1
     ports:
-      - '10843:8443'
-      - '10840:9440'
+      - "10843:8443"
+      - "10840:9440"
     ulimits:
       nofile:
         soft: 262144
         hard: 262144
     volumes:
-      - './.docker/clickhouse/single_node_tls/config.xml:/etc/clickhouse-server/config.xml'
-      - './.docker/clickhouse/single_node_tls/users.xml:/etc/clickhouse-server/users.xml'
+      - "./.docker/clickhouse/single_node_tls/config.xml:/etc/clickhouse-server/config.xml"
+      - "./.docker/clickhouse/single_node_tls/users.xml:/etc/clickhouse-server/users.xml"
