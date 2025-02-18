@@ -20,7 +20,7 @@ def get_engine(connection, table_name, schema=None):
     return build_engine(row.engine_full)
 
 
-class ChInspector(Inspector):
+class TpInspector(Inspector):
 
     def reflect_table(self, table, include_columns, exclude_columns, *_args, **_kwargs):
         schema = table.schema
@@ -54,4 +54,4 @@ class ChInspector(Inspector):
         return columns
 
 
-ChInspector.reflecttable = ChInspector.reflect_table  # Hack to provide backward compatibility for SQLAlchemy 1.3
+TpInspector.reflecttable = TpInspector.reflect_table  # Hack to provide backward compatibility for SQLAlchemy 1.3

@@ -5,7 +5,7 @@ from timeplus_connect.cc_sqlalchemy.sql import  format_table
 from timeplus_connect.driver.binding import quote_identifier
 
 
-class ChDDLCompiler(DDLCompiler):
+class TpDDLCompiler(DDLCompiler):
 
     def visit_create_schema(self, create, **_):
         return f'CREATE DATABASE {quote_identifier(create.element)}'

@@ -3,16 +3,16 @@ from sqlalchemy.engine.default import DefaultDialect
 
 from timeplus_connect import dbapi
 
-from timeplus_connect.cc_sqlalchemy.inspector import ChInspector
+from timeplus_connect.cc_sqlalchemy.inspector import TpInspector
 from timeplus_connect.cc_sqlalchemy.sql import full_table
-from timeplus_connect.cc_sqlalchemy.sql.ddlcompiler import ChDDLCompiler
+from timeplus_connect.cc_sqlalchemy.sql.ddlcompiler import TpDDLCompiler
 from timeplus_connect.cc_sqlalchemy import ischema_names, dialect_name
-from timeplus_connect.cc_sqlalchemy.sql.preparer import ChIdentifierPreparer
+from timeplus_connect.cc_sqlalchemy.sql.preparer import TpIdentifierPreparer
 from timeplus_connect.driver.binding import quote_identifier, format_str
 
 
 # pylint: disable=too-many-public-methods,no-self-use,unused-argument
-class ClickHouseDialect(DefaultDialect):
+class TimeplusDialect(DefaultDialect):
     """
     See :py:class:`sqlalchemy.engine.interfaces`
     """
@@ -25,12 +25,12 @@ class ClickHouseDialect(DefaultDialect):
     supports_statement_cache = False
     returns_unicode_strings = True
     postfetch_lastrowid = False
-    ddl_compiler = ChDDLCompiler
-    preparer = ChIdentifierPreparer
+    ddl_compiler = TpDDLCompiler
+    preparer = TpIdentifierPreparer
     description_encoding = None
     max_identifier_length = 127
     ischema_names = ischema_names
-    inspector = ChInspector
+    inspector = TpInspector
 
     # pylint: disable=method-hidden
     @classmethod
