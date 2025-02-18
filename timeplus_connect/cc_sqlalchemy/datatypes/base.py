@@ -130,7 +130,7 @@ def sqla_type_from_name(name: str) -> ChSqlaType:
     try:
         type_cls = sqla_type_map[base]
     except KeyError:
-        err_str = f'Unrecognized ClickHouse type base: {base} name: {name}'
+        err_str = f'Unrecognized Timeplus type base: {base} name: {name}'
         logger.error(err_str)
         raise CompileError(err_str) from KeyError
     return type_cls.build(type_def)

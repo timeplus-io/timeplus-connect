@@ -68,7 +68,7 @@ class Float32(ChSqlaType, Float):
 
 
 class Float64(ChSqlaType, Float):
-    base = ('float32', )
+    base = ('float64', )
     def __init__(self, type_def: TypeDef = EMPTY_TYPE_DEF):
         ChSqlaType.__init__(self, type_def)
         Float.__init__(self)
