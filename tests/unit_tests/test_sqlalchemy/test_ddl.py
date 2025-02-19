@@ -3,9 +3,9 @@ from sqlalchemy.sql.ddl import CreateTable
 
 from timeplus_connect.cc_sqlalchemy.datatypes.sqltypes import UInt64, UInt32, DateTime
 from timeplus_connect.cc_sqlalchemy.ddl.tableengine import ReplicatedMergeTree, ReplacingMergeTree
-from timeplus_connect.cc_sqlalchemy.dialect import ClickHouseDialect
+from timeplus_connect.cc_sqlalchemy.dialect import TimeplusDialect
 
-dialect = ClickHouseDialect()
+dialect = TimeplusDialect()
 
 replicated_mt_ddl = """\
 CREATE STREAM `replicated_mt_test` (`key` uint64) Engine ReplicatedMergeTree('/clickhouse/tables/repl_mt_test',\

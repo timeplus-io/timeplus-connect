@@ -5,17 +5,17 @@ libraries.  In most cases docstring are taken from the DBIApi 2.0 documentation
 """
 
 
-class ClickHouseError(Exception):
-    """Exception related to operation with ClickHouse."""
+class TimeplusError(Exception):
+    """Exception related to operation with Timeplus."""
 
 
 # pylint: disable=redefined-builtin
-class Warning(Warning, ClickHouseError):
+class Warning(Warning, TimeplusError):
     """Exception raised for important warnings like data truncations
     while inserting, etc."""
 
 
-class Error(ClickHouseError):
+class Error(TimeplusError):
     """Exception that is the base class of all other error exceptions
     (not Warning)."""
 

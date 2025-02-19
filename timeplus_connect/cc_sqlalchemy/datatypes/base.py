@@ -10,7 +10,7 @@ from timeplus_connect.driver.binding import str_query_value
 logger = logging.getLogger(__name__)
 
 
-class ChSqlaType:
+class TpSqlaType:
     """
     A SQLAlchemy TypeEngine that wraps a TimeplusType.  We don't extend TypeEngine directly, instead all concrete
     subclasses will inherit from TypeEngine.
@@ -19,13 +19,13 @@ class ChSqlaType:
     generic_type: None
     _ch_type_cls = None
     _instance = None
-    _instance_cache: Dict[TypeDef, 'ChSqlaType'] = None
+    _instance_cache: Dict[TypeDef, 'TpSqlaType'] = None
     base = None
 
     def __init_subclass__(cls):
         """
         Registers ChSqla type in the type map and sets the underlying TimeplusType class to use to initialize
-        ChSqlaType instances
+        TpSqlaType instances
         """
         for type_name in (cls.base or ()):
             if not cls._ch_type_cls:
@@ -41,9 +41,9 @@ class ChSqlaType:
     @classmethod
     def build(cls, type_def: TypeDef):
         """
-        Factory function for building a ChSqlaType based on the type definition
+        Factory function for building a TpSqlaType based on the type definition
         :param type_def: -- TypeDef tuple that defines arguments for this instance
-        :return: Shared instance of a configured ChSqlaType
+        :return: Shared instance of a configured TpSqlaType
         """
         return cls._instance_cache.setdefault(type_def, cls(type_def=type_def))
 
@@ -116,21 +116,21 @@ class CaseInsensitiveDict(dict):
         return super().__getitem__(item.lower())
 
 
-sqla_type_map: Dict[str, Type[ChSqlaType]] = CaseInsensitiveDict()
+sqla_type_map: Dict[str, Type[TpSqlaType]] = CaseInsensitiveDict()
 schema_types = []
 
 
-def sqla_type_from_name(name: str) -> ChSqlaType:
+def sqla_type_from_name(name: str) -> TpSqlaType:
     """
-    Factory function to convert a ClickHouse type name to the appropriate ChSqlaType
+    Factory function to convert a ClickHouse type name to the appropriate TpSqlaType
     :param name: Name returned from ClickHouse using Native protocol or WithNames format
-    :return: ChSqlaType
+    :return: TpSqlaType
     """
     base, name, type_def = parse_name(name)
     try:
         type_cls = sqla_type_map[base]
     except KeyError:
-        err_str = f'Unrecognized ClickHouse type base: {base} name: {name}'
+        err_str = f'Unrecognized Timeplus type base: {base} name: {name}'
         logger.error(err_str)
         raise CompileError(err_str) from KeyError
     return type_cls.build(type_def)

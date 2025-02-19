@@ -6,78 +6,78 @@ from sqlalchemy.types import Integer, Float, Numeric, Boolean as SqlaBoolean, \
     UserDefinedType, String as SqlaString, DateTime as SqlaDateTime, Date as SqlaDate
 from sqlalchemy.exc import ArgumentError
 
-from timeplus_connect.cc_sqlalchemy.datatypes.base import ChSqlaType
+from timeplus_connect.cc_sqlalchemy.datatypes.base import TpSqlaType
 from timeplus_connect.datatypes.base import TypeDef, NULLABLE_TYPE_DEF, LC_TYPE_DEF, EMPTY_TYPE_DEF
 from timeplus_connect.datatypes.numeric import Enum8 as ChEnum8, Enum16 as ChEnum16
 from timeplus_connect.driver.common import decimal_prec
 
 
-class Int8(ChSqlaType, Integer):
+class Int8(TpSqlaType, Integer):
     base = ('int8', )
 
 
-class UInt8(ChSqlaType, Integer):
+class UInt8(TpSqlaType, Integer):
     base = ('uint8', )
 
 
-class Int16(ChSqlaType, Integer):
+class Int16(TpSqlaType, Integer):
     base = ('int16', )
 
 
-class UInt16(ChSqlaType, Integer):
+class UInt16(TpSqlaType, Integer):
     base = ('uint16', )
 
 
-class Int32(ChSqlaType, Integer):
+class Int32(TpSqlaType, Integer):
     base = ('int32', 'int')
 
 
-class UInt32(ChSqlaType, Integer):
+class UInt32(TpSqlaType, Integer):
     base = ('uint32', 'uint')
 
 
-class Int64(ChSqlaType, Integer):
+class Int64(TpSqlaType, Integer):
     base = ('int64', )
 
 
-class UInt64(ChSqlaType, Integer):
+class UInt64(TpSqlaType, Integer):
     base = ('uint64', )
 
 
-class Int128(ChSqlaType, Integer):
+class Int128(TpSqlaType, Integer):
     base = ('int128', )
 
 
-class UInt128(ChSqlaType, Integer):
+class UInt128(TpSqlaType, Integer):
     base = ('uint128', )
 
 
-class Int256(ChSqlaType, Integer):
+class Int256(TpSqlaType, Integer):
     base = ('int256', )
 
 
-class UInt256(ChSqlaType, Integer):
+class UInt256(TpSqlaType, Integer):
     base = ('uint256', )
 
 
-class Float32(ChSqlaType, Float):
+class Float32(TpSqlaType, Float):
     base = ('float32', )
     def __init__(self, type_def: TypeDef = EMPTY_TYPE_DEF):
-        ChSqlaType.__init__(self, type_def)
+        TpSqlaType.__init__(self, type_def)
         Float.__init__(self)
 
 
-class Float64(ChSqlaType, Float):
-    base = ('float32', )
+class Float64(TpSqlaType, Float):
+    base = ('float64', )
     def __init__(self, type_def: TypeDef = EMPTY_TYPE_DEF):
-        ChSqlaType.__init__(self, type_def)
+        TpSqlaType.__init__(self, type_def)
         Float.__init__(self)
 
 
-class Bool(ChSqlaType, SqlaBoolean):
+class Bool(TpSqlaType, SqlaBoolean):
     base = ('bool', )
     def __init__(self, type_def: TypeDef = EMPTY_TYPE_DEF):
-        ChSqlaType.__init__(self, type_def)
+        TpSqlaType.__init__(self, type_def)
         SqlaBoolean.__init__(self)
 
 
@@ -85,7 +85,7 @@ class Boolean(Bool):
     pass
 
 
-class Decimal(ChSqlaType, Numeric):
+class Decimal(TpSqlaType, Numeric):
     base = ('Decimal', 'decimal')
     dec_size = 0
 
@@ -106,7 +106,7 @@ class Decimal(ChSqlaType, Numeric):
             raise ArgumentError('Invalid precision or scale for ClickHouse Decimal type')
         else:
             type_def = TypeDef(values=(precision, scale))
-        ChSqlaType.__init__(self, type_def)
+        TpSqlaType.__init__(self, type_def)
         Numeric.__init__(self, precision, scale)
 
 
@@ -131,7 +131,7 @@ class Decimal256(Decimal):
     dec_size = 256
 
 
-class Enum(ChSqlaType, UserDefinedType):
+class Enum(TpSqlaType, UserDefinedType):
     _size = 16
     python_type = str
     base = ('enum', )
@@ -185,73 +185,73 @@ class Enum16(Enum):
     base = ('enum16', )
 
 
-class String(ChSqlaType, UserDefinedType):
+class String(TpSqlaType, UserDefinedType):
     python_type = str
     base = ('string', )
 
 
-class FixedString(ChSqlaType, SqlaString):
+class FixedString(TpSqlaType, SqlaString):
     base = ('fixed_string', )
     def __init__(self, size: int = -1, type_def: TypeDef = None):
         if not type_def:
             type_def = TypeDef(values=(size,))
-        ChSqlaType.__init__(self, type_def)
+        TpSqlaType.__init__(self, type_def)
         SqlaString.__init__(self, size)
 
 
-class IPv4(ChSqlaType, UserDefinedType):
+class IPv4(TpSqlaType, UserDefinedType):
     python_type = None
     base = ('ipv4', )
 
 
-class IPv6(ChSqlaType, UserDefinedType):
+class IPv6(TpSqlaType, UserDefinedType):
     python_type = None
     base = ('ipv6', )
 
 
-class UUID(ChSqlaType, UserDefinedType):
+class UUID(TpSqlaType, UserDefinedType):
     python_type = None
     base = ('uuid', )
 
 
-class Nothing(ChSqlaType, UserDefinedType):
+class Nothing(TpSqlaType, UserDefinedType):
     python_type = None
 
 
 # proton doesn't support geometric type
-class Point(ChSqlaType, UserDefinedType):
+class Point(TpSqlaType, UserDefinedType):
     python_type = None
 
 
-class Ring(ChSqlaType, UserDefinedType):
+class Ring(TpSqlaType, UserDefinedType):
     python_type = None
 
 
-class Polygon(ChSqlaType, UserDefinedType):
+class Polygon(TpSqlaType, UserDefinedType):
     python_type = None
 
 
-class MultiPolygon(ChSqlaType, UserDefinedType):
+class MultiPolygon(TpSqlaType, UserDefinedType):
     python_type = None
 
 
-class LineString(ChSqlaType, UserDefinedType):
+class LineString(TpSqlaType, UserDefinedType):
     python_type = None
 
 
-class MultiLineString(ChSqlaType, UserDefinedType):
+class MultiLineString(TpSqlaType, UserDefinedType):
     python_type = None
 
 
-class Date(ChSqlaType, SqlaDate):
+class Date(TpSqlaType, SqlaDate):
     base = ('date', 'Date')
 
 
-class Date32(ChSqlaType, SqlaDate):
+class Date32(TpSqlaType, SqlaDate):
     base = ('date32', 'Date32')
 
 
-class DateTime(ChSqlaType, SqlaDateTime):
+class DateTime(TpSqlaType, SqlaDateTime):
     base = ('datetime', 'DateTime')
     def __init__(self, tz: str = None, type_def: TypeDef = None):
         """
@@ -265,11 +265,11 @@ class DateTime(ChSqlaType, SqlaDateTime):
                 type_def = TypeDef(values=(f"'{tz}'",))
             else:
                 type_def = EMPTY_TYPE_DEF
-        ChSqlaType.__init__(self, type_def)
+        TpSqlaType.__init__(self, type_def)
         SqlaDateTime.__init__(self)
 
 
-class DateTime64(ChSqlaType, SqlaDateTime):
+class DateTime64(TpSqlaType, SqlaDateTime):
     base = ('datetime64', 'DateTime64')
     def __init__(self, precision: int = None, tz: str = None, type_def: TypeDef = None):
         """
@@ -287,7 +287,7 @@ class DateTime64(ChSqlaType, SqlaDateTime):
         prec = type_def.values[0] if len(type_def.values) else None
         if not isinstance(prec, int) or prec < 0 or prec > 9:
             raise ArgumentError(f'Invalid precision value {prec} for ClickHouse DateTime64')
-        ChSqlaType.__init__(self, type_def)
+        TpSqlaType.__init__(self, type_def)
         SqlaDateTime.__init__(self)
 
 
@@ -298,12 +298,12 @@ class Nullable:
     """
     base = ('nullable', )
 
-    def __new__(cls, element: Union[ChSqlaType, Type[ChSqlaType]]):
+    def __new__(cls, element: Union[TpSqlaType, Type[TpSqlaType]]):
         """
         Actually returns an instance of the enclosed type with a Nullable wrapper.  If element is an instance,
         constructs a new instance with a copied TypeDef plus the Nullable wrapper.  If element is just a type,
         constructs a new element of that type with only the Nullable wrapper.
-        :param element: ChSqlaType instance or class to wrap
+        :param element: TpSqlaType instance or class to wrap
         """
         if callable(element):
             return element(type_def=NULLABLE_TYPE_DEF)
@@ -321,12 +321,12 @@ class LowCardinality:
     """
     base = ('low_cardinality', )
 
-    def __new__(cls, element: Union[ChSqlaType, Type[ChSqlaType]]):
+    def __new__(cls, element: Union[TpSqlaType, Type[TpSqlaType]]):
         """
        Actually returns an instance of the enclosed type with a LowCardinality wrapper.  If element is an instance,
        constructs a new instance with a copied TypeDef plus the LowCardinality wrapper.  If element is just a type,
        constructs a new element of that type with only the LowCardinality wrapper.
-       :param element: ChSqlaType instance or class to wrap
+       :param element: TpSqlaType instance or class to wrap
        """
         if callable(element):
             return element(type_def=LC_TYPE_DEF)
@@ -335,14 +335,14 @@ class LowCardinality:
         return element.__class__(type_def=TypeDef(wrappers, orig.keys, orig.values))
 
 
-class Array(ChSqlaType, UserDefinedType):
+class Array(TpSqlaType, UserDefinedType):
     python_type = list
     base = ('array', )
 
-    def __init__(self, element: Union[ChSqlaType, Type[ChSqlaType]] = None, type_def: TypeDef = None):
+    def __init__(self, element: Union[TpSqlaType, Type[TpSqlaType]] = None, type_def: TypeDef = None):
         """
         Array constructor that can take a wrapped Array type if not constructed from a TypeDef
-        :param element: ChSqlaType instance or class to wrap
+        :param element: TpSqlaType instance or class to wrap
         :param type_def: TypeDef from parse_name function
         """
         if not type_def:
@@ -352,16 +352,16 @@ class Array(ChSqlaType, UserDefinedType):
         super().__init__(type_def)
 
 
-class Map(ChSqlaType, UserDefinedType):
+class Map(TpSqlaType, UserDefinedType):
     python_type = dict
     base = ('map', )
 
-    def __init__(self, key_type: Union[ChSqlaType, Type[ChSqlaType]] = None,
-                 value_type: Union[ChSqlaType, Type[ChSqlaType]] = None, type_def: TypeDef = None):
+    def __init__(self, key_type: Union[TpSqlaType, Type[TpSqlaType]] = None,
+                 value_type: Union[TpSqlaType, Type[TpSqlaType]] = None, type_def: TypeDef = None):
         """
         Map constructor that can take a wrapped key/values types if not constructed from a TypeDef
-        :param key_type: ChSqlaType instance or class to use as keys for the Map
-        :param value_type: ChSqlaType instance or class to use as values for the Map
+        :param key_type: TpSqlaType instance or class to use as keys for the Map
+        :param value_type: TpSqlaType instance or class to use as values for the Map
         :param type_def: TypeDef from parse_name function
         """
         if not type_def:
@@ -373,14 +373,14 @@ class Map(ChSqlaType, UserDefinedType):
         super().__init__(type_def)
 
 
-class Tuple(ChSqlaType, UserDefinedType):
+class Tuple(TpSqlaType, UserDefinedType):
     python_type = tuple
     base = ('tuple', )
 
-    def __init__(self, elements: Sequence[Union[ChSqlaType, Type[ChSqlaType]]] = None, type_def: TypeDef = None):
+    def __init__(self, elements: Sequence[Union[TpSqlaType, Type[TpSqlaType]]] = None, type_def: TypeDef = None):
         """
        Tuple constructor that can take a list of element types if not constructed from a TypeDef
-       :param elements: sequence of ChSqlaType instance or class to use as tuple element types
+       :param elements: sequence of TpSqlaType instance or class to use as tuple element types
        :param type_def: TypeDef from parse_name function
        """
         if not type_def:
@@ -389,7 +389,7 @@ class Tuple(ChSqlaType, UserDefinedType):
         super().__init__(type_def)
 
 
-class JSON(ChSqlaType, UserDefinedType):
+class JSON(TpSqlaType, UserDefinedType):
     """
     Note this isn't currently supported for insert/select, only table definitions
     """
@@ -397,7 +397,7 @@ class JSON(ChSqlaType, UserDefinedType):
     base = ('json', )
 
 
-class Nested(ChSqlaType, UserDefinedType):
+class Nested(TpSqlaType, UserDefinedType):
     """
     Note this isn't currently supported for insert/select, only table definitions
     """
@@ -405,7 +405,7 @@ class Nested(ChSqlaType, UserDefinedType):
     base = ('nested', )
 
 
-class Object(ChSqlaType, UserDefinedType):
+class Object(TpSqlaType, UserDefinedType):
     """
     Note this isn't currently supported for insert/select, only table definitions
     """
@@ -418,15 +418,15 @@ class Object(ChSqlaType, UserDefinedType):
         super().__init__(type_def)
 
 
-class SimpleAggregateFunction(ChSqlaType, UserDefinedType):
+class SimpleAggregateFunction(TpSqlaType, UserDefinedType):
     python_type = None
     base = ('simple_aggregate_function', )
 
-    def __init__(self, name: str = None, element: Union[ChSqlaType, Type[ChSqlaType]] = None, type_def: TypeDef = None):
+    def __init__(self, name: str = None, element: Union[TpSqlaType, Type[TpSqlaType]] = None, type_def: TypeDef = None):
         """
         Constructor that can take the SimpleAggregateFunction name and wrapped type if not constructed from a TypeDef
         :param name: Aggregate function name
-        :param element: ChSqlaType instance or class which the function aggregates
+        :param element: TpSqlaType instance or class which the function aggregates
         :param type_def: TypeDef from parse_name function
         """
         if not type_def:
@@ -436,7 +436,7 @@ class SimpleAggregateFunction(ChSqlaType, UserDefinedType):
         super().__init__(type_def)
 
 
-class AggregateFunction(ChSqlaType, UserDefinedType):
+class AggregateFunction(TpSqlaType, UserDefinedType):
     """
     Note this isn't currently supported for insert/select, only table definitions
     """
@@ -455,7 +455,7 @@ class AggregateFunction(ChSqlaType, UserDefinedType):
             for x in params:
                 if callable(x):
                     x = x()
-                if isinstance(x, ChSqlaType):
+                if isinstance(x, TpSqlaType):
                     x = x.name
                 values += (x,)
             type_def = TypeDef(values=values)
