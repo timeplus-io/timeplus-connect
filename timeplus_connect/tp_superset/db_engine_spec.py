@@ -7,9 +7,13 @@ from marshmallow import fields, Schema
 from marshmallow.validate import Range
 from superset.db_engine_specs.base import BaseEngineSpec
 from superset.utils import core as utils
+from superset.sql.parse import SQLGLOT_DIALECTS
 
 from sqlalchemy import types
 from sqlalchemy.engine.url import URL
+
+
+from timeplus_connect.tp_superset.sql_parse import TimeplusSqlglotDialect
 
 
 logger = logging.getLogger(__name__)
@@ -72,6 +76,9 @@ class TimeplusEngineSpec(BaseEngineSpec):
     sqlalchemy_uri_placeholder = (
         "timeplusdb://user:password@host[:port][/dbname][?secure=value&=value...]"
     )
+
+    SQLGLOT_DIALECTS["timeplus"] = TimeplusSqlglotDialect
+    SQLGLOT_DIALECTS["timeplusdb"] = TimeplusSqlglotDialect
 
     parameters_schema = TimeplusParametersSchema()
     encryption_parameters = {"secure": "true"}
