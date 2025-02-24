@@ -226,11 +226,11 @@ class TimeplusSqlglotDialect(Dialect):
             "ENUM8": TokenType.ENUM8,
             "ENUM16": TokenType.ENUM16,
             "FINAL": TokenType.FINAL,
-            "FIXEDSTRING": TokenType.FIXEDSTRING,
+            "FIXED_STRING": TokenType.FIXEDSTRING,
             "FLOAT32": TokenType.FLOAT,
             "FLOAT64": TokenType.DOUBLE,
             "GLOBAL": TokenType.GLOBAL,
-            "LOWCARDINALITY": TokenType.LOWCARDINALITY,
+            "LOW_CARDINALITY": TokenType.LOWCARDINALITY,
             "MAP": TokenType.MAP,
             "NESTED": TokenType.NESTED,
             "SAMPLE": TokenType.TABLE_SAMPLE,
@@ -393,7 +393,7 @@ class TimeplusSqlglotDialect(Dialect):
 
         AGG_FUNCTIONS_SUFFIXES = [
             "if",
-            "aary",
+            "array",
             "array_if",
             "map",
             "simple_state",
@@ -524,9 +524,9 @@ class TimeplusSqlglotDialect(Dialect):
             if isinstance(dtype, exp.DataType) and dtype.args.get("nullable") is not True:
                 # Mark every type as non-nullable which is Timeplus's default, unless it's
                 # already marked as nullable. This marker helps us transpile types from other
-                # dialects to Timeplus, so that we can e.g. produce `CAST(x AS nullabe(String))`
+                # dialects to Timeplus, so that we can e.g. produce `CAST(x AS nullable(String))`
                 # from `CAST(x AS TEXT)`. If there is a `NULL` value in `x`, the former would
-                # fail in Timeplus without the `nullabe` type constructor.
+                # fail in Timeplus without the `nullable` type constructor.
                 dtype.set("nullable", False)
 
             return dtype
@@ -563,7 +563,7 @@ class TimeplusSqlglotDialect(Dialect):
 
         def _parse_query_parameter(self) -> t.Optional[exp.Expression]:
             """
-            Parse a placeholder expression like SELECT {abc: UInt32} or FROM {table: Identifier}
+            Parse a placeholder expression like SELECT {abc: uint32} or FROM {table: Identifier}
             """
             index = self._index
 
@@ -958,7 +958,7 @@ class TimeplusSqlglotDialect(Dialect):
             exp.ArgMax: arg_max_or_min_no_count("arg_max"),
             exp.ArgMin: arg_max_or_min_no_count("arg_min"),
             exp.Array: inline_array_sql,
-            exp.CastToStrType: rename_func("cast"),
+            exp.CastToStrType: rename_func("CAST"),
             exp.CountIf: rename_func("count_if"),
             exp.CompressColumnConstraint: lambda self,
             e: f"CODEC({self.expressions(e, key='this', flat=True)})",
@@ -1062,7 +1062,7 @@ class TimeplusSqlglotDialect(Dialect):
         def trycast_sql(self, expression: exp.TryCast) -> str:
             dtype = expression.to
             if not dtype.is_type(*self.NON_NULLABLE_TYPES, check_nullable=True):
-                # Casting x into nullabe(T) appears to behave similarly to TRY_CAST(x AS T)
+                # Casting x into nullable(T) appears to behave similarly to TRY_CAST(x AS T)
                 dtype.set("nullable", True)
 
             return super().cast_sql(expression)
@@ -1110,13 +1110,13 @@ class TimeplusSqlglotDialect(Dialect):
             else:
                 dtype = super().datatype_sql(expression)
 
-            # This section changes the type to `nullabe(...)` if the following conditions hold:
-            # - It's marked as nullable - this ensures we won't wrap Timeplus types with `nullabe`
+            # This section changes the type to `nullable(...)` if the following conditions hold:
+            # - It's marked as nullable - this ensures we won't wrap Timeplus types with `nullable`
             #   and change their semantics
             # - It's not the key type of a `Map`. This is because Timeplus enforces the following
             #   constraint: "Type of Map key must be a type, that can be represented by integer or
             #   String or FixedString (possibly LowCardinality) or UUID or IPv6"
-            # - It's not a composite type, e.g. `nullabe(array(...))` is not a valid type
+            # - It's not a composite type, e.g. `nullable(array(...))` is not a valid type
             parent = expression.parent
             nullable = expression.args.get("nullable")
             if nullable is True or (
@@ -1128,7 +1128,7 @@ class TimeplusSqlglotDialect(Dialect):
                 )
                 and not expression.is_type(*self.NON_NULLABLE_TYPES, check_nullable=True)
             ):
-                dtype = f"nullabe({dtype})"
+                dtype = f"nullable({dtype})"
 
             return dtype
 
@@ -1247,3 +1247,7 @@ class TimeplusSqlglotDialect(Dialect):
                 is_sql = self.wrap(is_sql)
 
             return is_sql
+
+    tokenizer_class = Tokenizer
+    parser_class = Parser
+    generator_class = Generator

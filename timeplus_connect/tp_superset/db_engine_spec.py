@@ -2,7 +2,7 @@ import logging
 from datetime import datetime
 from typing import Any
 
-# pylint:disable=E0401
+# pylint:disable=E0401, E0611
 from marshmallow import fields, Schema
 from marshmallow.validate import Range
 from superset.db_engine_specs.base import BaseEngineSpec
@@ -13,7 +13,7 @@ from sqlalchemy import types
 from sqlalchemy.engine.url import URL
 
 
-from timeplus_connect.tp_superset.sql_parse import TimeplusSqlglotDialect
+from timeplus_connect.tp_sqlglot.dialect import TimeplusSqlglotDialect
 
 
 logger = logging.getLogger(__name__)
