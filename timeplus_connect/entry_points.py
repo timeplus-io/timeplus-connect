@@ -5,8 +5,8 @@ import sys
 
 from importlib.metadata import PackageNotFoundError, distribution
 
-EXPECTED_EPS = {'sqlalchemy.dialects:timeplusdb',
-                'sqlalchemy.dialects:timeplusdb.connect'}
+EXPECTED_EPS = {'sqlalchemy.dialects:timeplus',
+                'sqlalchemy.dialects:timeplus.connect'}
 
 
 def validate_entrypoints():
