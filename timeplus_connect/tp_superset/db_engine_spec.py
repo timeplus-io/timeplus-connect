@@ -67,18 +67,17 @@ class TimeplusParametersSchema(Schema):
 class TimeplusEngineSpec(BaseEngineSpec):
     """Engine spec for timeplus-connect connector"""
 
-    engine = "timeplusdb"
+    engine = "timeplus"
     engine_name = "Timeplus Connect (Superset)"
 
     _show_functions_column = "name"
     supports_file_upload = False
 
     sqlalchemy_uri_placeholder = (
-        "timeplusdb://user:password@host[:port][/dbname][?secure=value&=value...]"
+        "timeplus://user:password@host[:port][/dbname][?secure=value&=value...]"
     )
 
     SQLGLOT_DIALECTS["timeplus"] = TimeplusSqlglotDialect
-    SQLGLOT_DIALECTS["timeplusdb"] = TimeplusSqlglotDialect
 
     parameters_schema = TimeplusParametersSchema()
     encryption_parameters = {"secure": "true"}

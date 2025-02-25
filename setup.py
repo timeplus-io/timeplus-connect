@@ -73,9 +73,9 @@ def run_setup(try_c: bool = True):
         },
         tests_require=['pytest'],
         entry_points={
-            'sqlalchemy.dialects': ['timeplusdb.connect=timeplus_connect.cc_sqlalchemy.dialect:TimeplusDialect',
-                                    'timeplusdb=timeplus_connect.cc_sqlalchemy.dialect:TimeplusDialect'],
-            'superset.db_engine_specs': ['timeplusdb=timeplus_connect.tp_superset.db_engine_spec:TimeplusEngineSpec']
+            'sqlalchemy.dialects': ['timeplus.connect=timeplus_connect.cc_sqlalchemy.dialect:TimeplusDialect',
+                                    'timeplus=timeplus_connect.cc_sqlalchemy.dialect:TimeplusDialect'],
+            'superset.db_engine_specs': ['timeplus=timeplus_connect.tp_superset.db_engine_spec:TimeplusEngineSpec']
         },
         classifiers=[
             'Development Status :: 4 - Beta',

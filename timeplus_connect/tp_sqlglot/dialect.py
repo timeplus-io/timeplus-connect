@@ -917,7 +917,8 @@ class TimeplusSqlglotDialect(Dialect):
             exp.DataType.Type.DECIMAL32: "Decimal32",
             exp.DataType.Type.DECIMAL64: "Decimal64",
             exp.DataType.Type.DECIMAL128: "Decimal128",
-            exp.DataType.Type.DECIMAL256: "Decimal256",
+            # superset use the sqlglot with version 25.24.0 which is not support DECIMAL256.
+            # exp.DataType.Type.DECIMAL256: "Decimal256",
             exp.DataType.Type.TIMESTAMP: "DateTime",
             exp.DataType.Type.TIMESTAMPTZ: "DateTime",
             exp.DataType.Type.DOUBLE: "float64",
@@ -978,7 +979,8 @@ class TimeplusSqlglotDialect(Dialect):
             exp.JSONPathKey: json_path_key_only_name,
             exp.JSONPathRoot: lambda *_: "",
             exp.Map: _map_sql,
-            exp.Median: rename_func("median"),
+            # superset use the sqlglot with version 25.24.0 which is not support Median.
+            # exp.Median: rename_func("median"),
             exp.PartitionedByProperty: lambda self, e: f"PARTITION BY {self.sql(e, 'this')}",
             exp.Pivot: no_pivot_sql,
             exp.Quantile: _quantile_sql,

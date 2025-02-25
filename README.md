@@ -20,14 +20,14 @@ pip install timeplus-connect
 
 Timeplus Connect requires Python 3.9 or higher.
 
-### Superset Connectivity (working-in-progress)
+### Superset Connectivity
 
 Timeplus Connect is fully integrated with Apache Superset.
 
 When creating a Superset Data Source, use a SqlAlchemy DSN in the form
-`timeplusdb://{username}:{password}@{host}:{port}`, such as `timeplusdb://default:password@localhost:8123`.
+`timeplus://{username}:{password}@{host}:{port}`, such as `timeplus://default:password@localhost:8123`.
 
-### SQLAlchemy Implementation (to be verified)
+### SQLAlchemy Implementation
 
 Timeplus Connect incorporates a minimal SQLAlchemy implementation (without any ORM features) for compatibility with
 Superset. It has only been tested against SQLAlchemy versions 1.3.x and 1.4.x, and is unlikely to work with more
