@@ -50,7 +50,7 @@ class TimeplusDialect(DefaultDialect):
                                    f'WHERE name = {format_str(db_name)}')).rowcount > 0
 
     def get_table_names(self, connection, schema=None, **kw):
-        cmd = 'SHOW TABLES'
+        cmd = 'SHOW STREAMS'
         if schema:
             cmd += ' FROM ' + quote_identifier(schema)
         return [row.name for row in connection.execute(cmd)]
