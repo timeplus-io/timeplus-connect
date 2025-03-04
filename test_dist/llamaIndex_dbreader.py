@@ -1,18 +1,11 @@
 from llama_index.readers.database import DatabaseReader
-from llama_index.core import VectorStoreIndex
 import timeplus_connect
-client: timeplus_connect.driver.Client
 
-from sqlalchemy.engine import create_engine
 
 # Ensure the timeplus-connect driver is registered
 TIMEPLUS_URI = "timeplus://user:password@localhost:8123"
-
-# Create SQLAlchemy engine explicitly
-engine = create_engine(TIMEPLUS_URI)
-
 db_reader = DatabaseReader(
-    engine=engine  # Use the explicit SQLAlchemy engine
+    uri=TIMEPLUS_URI  # Use the explicit SQLAlchemy engine
 )
 
 print(f"db reader type: {type(db_reader)}")
