@@ -39,7 +39,7 @@ class TimeplusDialect(DefaultDialect):
     @classmethod
     def dbapi(cls):
         return dbapi
-    
+
     @classmethod
     def import_dbapi(cls):
         return dbapi
@@ -49,7 +49,8 @@ class TimeplusDialect(DefaultDialect):
 
     @staticmethod
     def get_schema_names(connection, **_):
-        return [row.name for row in connection.execute('SHOW DATABASES')]
+        query = text('SHOW DATABASES')
+        return [row.name for row in connection.execute(query)]
 
     @staticmethod
     def has_database(connection, db_name):
@@ -62,14 +63,14 @@ class TimeplusDialect(DefaultDialect):
             cmd = text(f"SHOW STREAMS FROM {quote_identifier(schema)}")  # Ensure schema is properly quoted
 
         return [row.name for row in connection.execute(cmd)]
-    
+
     def get_columns(self, connection, table_name, schema=None, **kwargs):
         if schema is None:
             schema = 'default'
-            
+
         table_id = full_table(table_name, schema)
         query = text(f"DESCRIBE {table_id}")
-        
+
         result_set = connection.execute(query)
         if not result_set:
             raise NoResultFound(f'STREAM {full_table} does not exist')

@@ -9,3 +9,6 @@ build:
 
 install: build
 	python3 -m pip install --upgrade dist/timeplus_connect-$(VERSION).tar.gz
+
+lint:
+	pylint --rcfile=./pylintrc  timeplus_connect

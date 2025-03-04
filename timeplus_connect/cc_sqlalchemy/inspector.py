@@ -15,9 +15,9 @@ ch_col_args = ('default_type', 'codec_expression', 'ttl_expression')
 def get_engine(connection, table_name, schema=None):
     if schema is None:
         schema = 'default'
-        
+
     query = text(f"SELECT engine_full FROM system.tables WHERE database = '{schema}' and name = '{table_name}'")
-    
+
     result_set = connection.execute(query)
     row = next(result_set, None)
     if not row:
@@ -41,7 +41,7 @@ class TpInspector(Inspector):
     def get_columns(self, table_name, schema=None, **_kwargs):
         table_id = full_table(table_name, schema)
         query = text(f"DESCRIBE {table_id}")
-        
+
         result_set = self.bind.execute(query)
         if not result_set:
             raise NoResultFound(f'STREAM {full_table} does not exist')
