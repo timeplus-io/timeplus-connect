@@ -1,5 +1,6 @@
 import sqlalchemy.schema as sa_schema
 
+from sqlalchemy import text
 from sqlalchemy.engine.reflection import Inspector
 from sqlalchemy.orm.exc import NoResultFound
 
@@ -12,8 +13,12 @@ ch_col_args = ('default_type', 'codec_expression', 'ttl_expression')
 
 
 def get_engine(connection, table_name, schema=None):
-    result_set = connection.execute(
-        f"SELECT engine_full FROM system.tables WHERE database = '{schema}' and name = '{table_name}'")
+    if schema is None:
+        schema = 'default'
+        
+    query = text(f"SELECT engine_full FROM system.tables WHERE database = '{schema}' and name = '{table_name}'")
+    
+    result_set = connection.execute(query)
     row = next(result_set, None)
     if not row:
         raise NoResultFound(f'STREAM {schema}.{table_name} does not exist')
@@ -35,7 +40,9 @@ class TpInspector(Inspector):
 
     def get_columns(self, table_name, schema=None, **_kwargs):
         table_id = full_table(table_name, schema)
-        result_set = self.bind.execute(f'DESCRIBE {table_id}')
+        query = text(f"DESCRIBE {table_id}")
+        
+        result_set = self.bind.execute(query)
         if not result_set:
             raise NoResultFound(f'STREAM {full_table} does not exist')
         columns = []
