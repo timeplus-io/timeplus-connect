@@ -39,6 +39,9 @@ class TpInspector(Inspector):
         table.engine = get_engine(self.bind, table.name, schema)
 
     def get_columns(self, table_name, schema=None, **_kwargs):
+        if schema is None:
+            schema = 'default'
+            
         table_id = full_table(table_name, schema)
         query = text(f"DESCRIBE {table_id}")
 

@@ -64,30 +64,8 @@ class TimeplusDialect(DefaultDialect):
         return [row.name for row in connection.execute(cmd)]
 
     def get_columns(self, connection, table_name, schema=None, **kwargs):
-        if schema is None:
-            schema = 'default'
-
-        table_id = full_table(table_name, schema)
-        query = text(f"DESCRIBE {table_id}")
-
-        result_set = connection.execute(query)
-        if not result_set:
-            raise NoResultFound(f'STREAM {full_table} does not exist')
-        columns = []
-        for row in result_set:
-            sqla_type = sqla_type_from_name(row.type.replace('\n', ''))
-            col = {'name': row.name,
-                   'type': sqla_type,
-                   'nullable': sqla_type.nullable,
-                   'autoincrement': False,
-                   'default': row.default_expression,
-                   'default_type': row.default_type,
-                   'comment': row.comment,
-                   'codec_expression': row.codec_expression,
-                   'ttl_expression': row.ttl_expression}
-            columns.append(col)
-        return columns
-
+        inspector = self.inspector(connection)
+        return inspector.get_columns(table_name, schema, **kwargs)
 
     def get_primary_keys(self, connection, table_name, schema=None, **kw):
         return []
