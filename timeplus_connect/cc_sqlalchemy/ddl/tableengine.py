@@ -266,7 +266,7 @@ def build_engine(full_engine: str) -> Optional[TableEngine]:
         engine_cls = engine_map[name]
     except KeyError:
         if not name.startswith('System'):
-            logger.warning('Engine %s not found', name)
+            logger.warning('Engine %s not found, full_engine: %s', name, full_engine)
         return None
     engine = engine_cls.__new__(engine_cls)
     engine.name = name

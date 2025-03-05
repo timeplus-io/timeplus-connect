@@ -1,5 +1,6 @@
 
 from sqlalchemy.engine.default import DefaultDialect
+from sqlalchemy.sql import text
 
 from timeplus_connect import dbapi
 
@@ -37,12 +38,17 @@ class TimeplusDialect(DefaultDialect):
     def dbapi(cls):
         return dbapi
 
+    @classmethod
+    def import_dbapi(cls):
+        return dbapi
+
     def initialize(self, connection):
         pass
 
     @staticmethod
     def get_schema_names(connection, **_):
-        return [row.name for row in connection.execute('SHOW DATABASES')]
+        query = text('SHOW DATABASES')
+        return [row.name for row in connection.execute(query)]
 
     @staticmethod
     def has_database(connection, db_name):
@@ -50,10 +56,15 @@ class TimeplusDialect(DefaultDialect):
                                    f'WHERE name = {format_str(db_name)}')).rowcount > 0
 
     def get_table_names(self, connection, schema=None, **kw):
-        cmd = 'SHOW STREAMS'
+        cmd = text('SHOW STREAMS')  # Wrap in text() to make it an executable SQLAlchemy statement
         if schema:
-            cmd += ' FROM ' + quote_identifier(schema)
+            cmd = text(f"SHOW STREAMS FROM {quote_identifier(schema)}")  # Ensure schema is properly quoted
+
         return [row.name for row in connection.execute(cmd)]
+
+    def get_columns(self, connection, table_name, schema=None, **kwargs):
+        inspector = self.inspector(connection)
+        return inspector.get_columns(table_name, schema, **kwargs)
 
     def get_primary_keys(self, connection, table_name, schema=None, **kw):
         return []
