@@ -1,7 +1,6 @@
 
 from sqlalchemy.engine.default import DefaultDialect
 from sqlalchemy.sql import text
-from sqlalchemy.orm.exc import NoResultFound
 
 from timeplus_connect import dbapi
 
@@ -11,7 +10,6 @@ from timeplus_connect.cc_sqlalchemy.sql.ddlcompiler import TpDDLCompiler
 from timeplus_connect.cc_sqlalchemy import ischema_names, dialect_name
 from timeplus_connect.cc_sqlalchemy.sql.preparer import TpIdentifierPreparer
 from timeplus_connect.driver.binding import quote_identifier, format_str
-from timeplus_connect.cc_sqlalchemy.datatypes.base import sqla_type_from_name
 
 # pylint: disable=too-many-public-methods,no-self-use,unused-argument
 class TimeplusDialect(DefaultDialect):
