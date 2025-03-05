@@ -11,6 +11,7 @@ from timeplus_connect.cc_sqlalchemy import ischema_names, dialect_name
 from timeplus_connect.cc_sqlalchemy.sql.preparer import TpIdentifierPreparer
 from timeplus_connect.driver.binding import quote_identifier, format_str
 
+
 # pylint: disable=too-many-public-methods,no-self-use,unused-argument
 class TimeplusDialect(DefaultDialect):
     """
