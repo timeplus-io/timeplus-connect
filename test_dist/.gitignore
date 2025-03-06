@@ -1,5 +1,6 @@
 # Ignore local configuration for superset
 dev_config.py
+env.sh
 
 # Ignore recommended symlink
 clickhouse_connect
