@@ -77,11 +77,15 @@ class TimeplusSettings:
         stream: str,
         database: str,
         engine: str,
+        batch_size: int,
+        metric: str,
         **kwargs: Any,
     ) -> None:
         self.stream = stream
         self.database = database
         self.engine = engine
+        self.batch_size = batch_size
+        self.metric = metric
 
     def build_query_statement(
         self,
@@ -95,7 +99,7 @@ class TimeplusSettings:
         return f"""
             SELECT id, doc_id, text, node_info, metadata,
             {distance}(vector, {query_embed_str}) AS score
-            FROM {self.database}.{self.stream} {where_str}
+            FROM table({self.database}.{self.stream}) {where_str}
             ORDER BY score ASC
             LIMIT {limit}
             """
@@ -154,6 +158,7 @@ class TimeplusVectorStore(BasePydanticVectorStore):
         stream: str = "llama_index",
         database: str = "default",
         engine: str = "Stream",
+        metric: str = "cosine",
         index_type: str = "NONE",
         batch_size: int = 1000,
         **kwargs: Any,
@@ -176,6 +181,8 @@ class TimeplusVectorStore(BasePydanticVectorStore):
             stream=stream,
             database=database,
             engine=engine,
+            metric=metric,
+            batch_size=batch_size,
             **kwargs,
         )
 
@@ -235,6 +242,7 @@ class TimeplusVectorStore(BasePydanticVectorStore):
             PRIMARY KEY (id, doc_id)
             """
         self._dim = dimension
+        self._client.command(schema_)
         self._table_existed = True
 
     def _upload_batch(
@@ -250,7 +258,7 @@ class TimeplusVectorStore(BasePydanticVectorStore):
             _data.append(_row)
 
         self._client.insert(
-            f"{self._config.database}.{self._config.table}",
+            f"{self._config.database}.{self._config.stream}",
             data=_data,
             column_names=self._column_names,
             column_type_names=self._column_type_names,
@@ -302,13 +310,13 @@ class TimeplusVectorStore(BasePydanticVectorStore):
             ref_doc_id (str): The doc_id of the document to delete.
         """
         self._client.command(
-            f"DELETE FROM {self._config.database}.{self._config.table} WHERE doc_id='{ref_doc_id}'"
+            f"DELETE FROM {self._config.database}.{self._config.stream} WHERE doc_id='{ref_doc_id}'"
         )
 
     def drop(self) -> None:
         """Drop ClickHouse table."""
         self._client.command(
-            f"DROP TABLE IF EXISTS {self._config.database}.{self._config.table}"
+            f"DROP STREAM IF EXISTS {self._config.database}.{self._config.stream}"
         )
 
     def query(
@@ -346,8 +354,13 @@ class TimeplusVectorStore(BasePydanticVectorStore):
         nodes = []
         ids = []
         similarities = []
+        #print(f"query: {query_statement}")
         response = self._client.query(query_statement)
+        #print(f"response: {response}")
         column_names = response.column_names
+        #print(f"column_names: {column_names}")
+        #print(f"column_names: {response.result_columns}")
+        
         id_idx = column_names.index("id")
         text_idx = column_names.index("text")
         metadata_idx = column_names.index("metadata")
@@ -380,6 +393,11 @@ class TimeplusVectorStore(BasePydanticVectorStore):
 # test code
 import os
 import timeplus_connect
+
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext
+from llama_index.core.vector_stores.types import ExactMatchFilter, MetadataFilters
+
+
 timeplus_host = os.getenv("TIMEPLUS_HOST") or "localhost"
 timeplus_user = os.getenv("TIMEPLUS_USER") or "proton"
 timeplus_password = os.getenv("TIMEPLUS_PASSWORD") or "timeplus@t+"
@@ -391,4 +409,39 @@ client = timeplus_connect.get_client(
             password=timeplus_password,
         )
 
-vector_store = TimeplusVectorStore(timeplus_client=client)
+# Load documents and build index
+documents = SimpleDirectoryReader(
+    "./data"
+).load_data()
+
+storage_context = StorageContext.from_defaults(
+    vector_store=TimeplusVectorStore(timeplus_client=client)
+)
+
+index = VectorStoreIndex.from_documents(
+    documents, storage_context=storage_context
+)
+
+'''
+# Query the index
+query_engine = index.as_query_engine()
+response = query_engine.query("What did the author do growing up?")
+
+print(response)
+'''
+
+# Query the index with filters
+query_engine = index.as_query_engine(
+    similarity_top_k=3,
+    vector_store_query_mode="default",
+    filters=MetadataFilters(
+        filters=[
+            ExactMatchFilter(key="file_name", value="paul_graham_essay.txt"),
+        ]
+    ),
+    alpha=None,
+    doc_ids=None,
+)
+response = query_engine.query("what did the author do growing up?")
+print(response)
+
