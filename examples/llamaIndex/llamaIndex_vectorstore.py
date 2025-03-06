@@ -6,6 +6,10 @@ Rewrite from https://github.com/run-llama/llama_index/blob/main/llama-index-inte
 
 """
 
+from llama_index.core.vector_stores.types import ExactMatchFilter, MetadataFilters
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext
+import timeplus_connect
+import os
 import importlib
 import json
 import logging
@@ -48,7 +52,8 @@ def escape_str(value: str) -> str:
     BS = "\\"
     must_escape = (BS, "'")
     return (
-        "".join(f"{BS}{c}" if c in must_escape else c for c in value) if value else ""
+        "".join(
+            f"{BS}{c}" if c in must_escape else c for c in value) if value else ""
     )
 
 
@@ -226,7 +231,8 @@ class TimeplusVectorStore(BasePydanticVectorStore):
         self._column_config = column_config
         self._column_names = column_names
         self._column_type_names = column_type_names
-        dimension = len(Settings.embed_model.get_query_embedding("try this out"))
+        dimension = len(
+            Settings.embed_model.get_query_embedding("try this out"))
         self.create_table(dimension)
 
     @property
@@ -254,7 +260,8 @@ class TimeplusVectorStore(BasePydanticVectorStore):
         for idx, item in enumerate(batch):
             _row = []
             for column_name in self._column_names:
-                _row.append(self._column_config[column_name]["extract_func"](item))
+                _row.append(
+                    self._column_config[column_name]["extract_func"](item))
             _data.append(_row)
 
         self._client.insert(
@@ -264,11 +271,10 @@ class TimeplusVectorStore(BasePydanticVectorStore):
             column_type_names=self._column_type_names,
         )
 
-
     def _append_meta_filter_condition(
         self, where_str: Optional[str], exact_match_filter: list
     ) -> str:
-        
+
         filter_str = " AND ".join(
             f"json_extract_string("
             f"{self.metadata_column}, '{filter_item.key}') "
@@ -354,13 +360,13 @@ class TimeplusVectorStore(BasePydanticVectorStore):
         nodes = []
         ids = []
         similarities = []
-        #print(f"query: {query_statement}")
+        # print(f"query: {query_statement}")
         response = self._client.query(query_statement)
-        #print(f"response: {response}")
+        # print(f"response: {response}")
         column_names = response.column_names
-        #print(f"column_names: {column_names}")
-        #print(f"column_names: {response.result_columns}")
-        
+        # print(f"column_names: {column_names}")
+        # print(f"column_names: {response.result_columns}")
+
         id_idx = column_names.index("id")
         text_idx = column_names.index("text")
         metadata_idx = column_names.index("metadata")
@@ -388,14 +394,9 @@ class TimeplusVectorStore(BasePydanticVectorStore):
             similarities.append(r[score_idx])
             ids.append(r[id_idx])
         return VectorStoreQueryResult(nodes=nodes, similarities=similarities, ids=ids)
-    
+
 
 # test code
-import os
-import timeplus_connect
-
-from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, StorageContext
-from llama_index.core.vector_stores.types import ExactMatchFilter, MetadataFilters
 
 
 timeplus_host = os.getenv("TIMEPLUS_HOST") or "localhost"
@@ -403,11 +404,11 @@ timeplus_user = os.getenv("TIMEPLUS_USER") or "proton"
 timeplus_password = os.getenv("TIMEPLUS_PASSWORD") or "timeplus@t+"
 
 client = timeplus_connect.get_client(
-            host=timeplus_host,
-            port=8123,
-            username=timeplus_user,
-            password=timeplus_password,
-        )
+    host=timeplus_host,
+    port=8123,
+    username=timeplus_user,
+    password=timeplus_password,
+)
 
 # Load documents and build index
 documents = SimpleDirectoryReader(
@@ -444,4 +445,3 @@ query_engine = index.as_query_engine(
 )
 response = query_engine.query("what did the author do growing up?")
 print(response)
-
