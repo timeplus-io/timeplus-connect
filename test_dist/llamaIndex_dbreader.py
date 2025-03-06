@@ -1,9 +1,16 @@
-from llama_index.readers.database import DatabaseReader
+import os
 import timeplus_connect
+
+from llama_index.readers.database import DatabaseReader
+
+
+timeplus_host = os.getenv("TIMEPLUS_HOST") or "localhost"
+timeplus_user = os.getenv("TIMEPLUS_USER") or "proton"
+timeplus_password = os.getenv("TIMEPLUS_PASSWORD") or "timeplus@t+"
 
 
 # Ensure the timeplus-connect driver is registered
-TIMEPLUS_URI = "timeplus://user:password@localhost:8123"
+TIMEPLUS_URI = f"timeplus://{timeplus_user}:{timeplus_password}@{timeplus_host}:8123"
 db_reader = DatabaseReader(
     uri=TIMEPLUS_URI  # Use the explicit SQLAlchemy engine
 )
