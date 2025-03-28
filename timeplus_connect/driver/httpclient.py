@@ -528,7 +528,7 @@ class HttpClient(Client):
         return True
         # proton hasn't HTTP handle for path /ping
         # try:
-        #     response = self.http.request('GET', f'{self.url}/ping', timeout=3)
+        #     response = self.http.request('GET', f'{self.url}/ping', timeout=3, preload_content=True)
         #     return 200 <= response.status < 300
         # except HTTPError:
         #     logger.debug('ping failed', exc_info=True)

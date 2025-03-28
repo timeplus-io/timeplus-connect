@@ -68,7 +68,7 @@ class Client(ABC):
         self.uri = uri
         self._init_common_settings(apply_server_timezone)
 
-    def _init_common_settings(self, apply_server_timezone:Optional[Union[str, bool]] ):
+    def _init_common_settings(self, apply_server_timezone: Optional[Union[str, bool]]):
         self.server_tz, dst_safe = pytz.UTC, True
         self.server_version, server_tz = \
             tuple(self.command('SELECT version(), timezone()', use_database=False))
@@ -122,14 +122,16 @@ class Client(ABC):
         return validated
 
     def _validate_setting(self, key: str, value: Any, invalid_action: str) -> Optional[str]:
-        new_value = str(value)
+        str_value = str(value)
         if value is True:
-            new_value = '1'
+            str_value = '1'
         elif value is False:
-            new_value = '0'
+            str_value = '0'
         if key not in self.valid_transport_settings:
             setting_def = self.server_settings.get(key)
-            if setting_def is None or (setting_def.readonly and setting_def.value != new_value):
+            if setting_def and setting_def.value == str_value:
+                return None  # don't send settings that are already the expected value
+            if setting_def is None or setting_def.readonly:
                 if key in self.optional_transport_settings:
                     return None
                 if invalid_action == 'send':
@@ -139,7 +141,7 @@ class Client(ABC):
                     return None
                 else:
                     raise ProgrammingError(f'Setting {key} is unknown or readonly') from None
-        return new_value
+        return str_value
 
     def _setting_status(self, key: str) -> SettingStatus:
         comp_setting = self.server_settings.get(key)
@@ -342,6 +344,7 @@ class Client(ABC):
         create_query_context method
         :return: Numpy array representing the result set
         """
+        check_numpy()
         return self._context_query(locals(), use_numpy=True).np_result
 
     # pylint: disable=duplicate-code,too-many-arguments,unused-argument
@@ -361,6 +364,7 @@ class Client(ABC):
         create_query_context method
         :return: Generator that yield a numpy array per block representing the result set
         """
+        check_numpy()
         return self._context_query(locals(), use_numpy=True, streaming=True).np_stream
 
     # pylint: disable=duplicate-code,unused-argument
@@ -384,6 +388,7 @@ class Client(ABC):
         create_query_context method
         :return: Pandas dataframe representing the result set
         """
+        check_pandas()
         return self._context_query(locals(), use_numpy=True, as_pandas=True).df_result
 
     # pylint: disable=duplicate-code,unused-argument
@@ -407,6 +412,7 @@ class Client(ABC):
         create_query_context method
         :return: Generator that yields a Pandas dataframe per block representing the result set
         """
+        check_pandas()
         return self._context_query(locals(), use_numpy=True,
                                    as_pandas=True,
                                    streaming=True).df_stream
@@ -519,6 +525,7 @@ class Client(ABC):
         :param external_data ClickHouse "external data" to send with query
         :return: PyArrow.Table
         """
+        check_arrow()
         settings = self._update_arrow_settings(settings, use_strings)
         return to_arrow(self.raw_query(query,
                                        parameters,
@@ -541,6 +548,7 @@ class Client(ABC):
         :param external_data ClickHouse "external data" to send with query
         :return: Generator that yields a PyArrow.Table for per block representing the result set
         """
+        check_arrow()
         settings = self._update_arrow_settings(settings, use_strings)
         return to_arrow_batches(self.raw_stream(query,
                                                 parameters,
@@ -661,6 +669,7 @@ class Client(ABC):
             different data batches
         :return: QuerySummary with summary information, throws exception if insert fails
         """
+        check_pandas()
         if context is None:
             if column_names is None:
                 column_names = df.columns
@@ -686,6 +695,7 @@ class Client(ABC):
         :param settings: Optional dictionary of ClickHouse settings (key/string values)
         :return: QuerySummary with summary information, throws exception if insert fails
         """
+        check_arrow()
         full_table = table if '.' in table or not database else f'{database}.{table}'
         compression = self.write_compression if self.write_compression in ('zstd', 'lz4') else None
         column_names, insert_block = arrow_buffer(arrow_table, compression)
