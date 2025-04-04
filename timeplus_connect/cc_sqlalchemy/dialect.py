@@ -33,11 +33,6 @@ class TimeplusDialect(DefaultDialect):
     ischema_names = ischema_names
     inspector = TpInspector
 
-    # pylint: disable=method-hidden
-    @classmethod
-    def dbapi(cls):
-        return dbapi
-
     @classmethod
     def import_dbapi(cls):
         return dbapi
@@ -98,7 +93,7 @@ class TimeplusDialect(DefaultDialect):
         return []
 
     def has_table(self, connection, table_name, schema=None, **_kw):
-        result = connection.execute(f'EXISTS TABLE {full_table(table_name, schema)}')
+        result = connection.execute(f'EXISTS STREAM {full_table(table_name, schema)}')
         row = result.fetchone()
         return row[0] == 1
 
