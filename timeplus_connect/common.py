@@ -41,7 +41,7 @@ def build_client_name(client_name: str):
             os_user = f'; os_user:{getpass.getuser()}'
         except Exception:  # pylint: disable=broad-except
             pass
-    return (f'{client_name}{product_name}clickhouse-connect/{version()}' +
+    return (f'{client_name}{product_name}timeplus-connect/{version()}' +
             f' (lv:py/{py_version}; mode:sync; os:{sys.platform}{os_user})')
 
 

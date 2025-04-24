@@ -12,9 +12,9 @@ EXPECTED_EPS = {'sqlalchemy.dialects:timeplus',
 def validate_entrypoints():
     expected_eps = EXPECTED_EPS.copy()
     try:
-        dist = distribution('clickhouse-connect')
+        dist = distribution('timeplus-connect')
     except PackageNotFoundError:
-        print ('\nClickHouse Connect package not found in this Python installation')
+        print ('\nTimeplus Connect package not found in this Python installation')
         return -1
     print()
     for entry_point in dist.entry_points:
