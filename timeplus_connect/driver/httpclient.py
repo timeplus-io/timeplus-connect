@@ -77,7 +77,7 @@ class HttpClient(Client):
                  tls_mode: Optional[str] = None,
                  proxy_path: str = ''):
         """
-        Create an HTTP ClickHouse Connect client
+        Create an HTTP Timeplus Connect client
         See timeplus_connect.get_client for parameters
         """
         proxy_path = proxy_path.lstrip('/')
@@ -216,7 +216,7 @@ class HttpClient(Client):
             response = self._raw_request(f'{context.final_query}\n FORMAT JSON',
                                          params, headers, retries=self.query_retries)
             json_result = json.loads(response.data)
-            # ClickHouse will respond with a JSON object of meta, data, and some other objects
+            # Timeplus will respond with a JSON object of meta, data, and some other objects
             # We just grab the column names and column types from the metadata sub object
             names: List[str] = []
             types: List[TimeplusType] = []
@@ -417,7 +417,7 @@ class HttpClient(Client):
         final_params = {}
         if server_wait:
             final_params['wait_end_of_query'] = '1'
-        # We can't actually read the progress headers, but we enable them so ClickHouse sends something
+        # We can't actually read the progress headers, but we enable them so Timeplus sends something
         # to keep the connection alive when waiting for long-running queries and (2) to get summary information
         # if not streaming
         if self._send_progress:
@@ -456,7 +456,7 @@ class HttpClient(Client):
             except HTTPError as ex:
                 if isinstance(ex.__context__, ConnectionResetError):
                     # The server closed the connection, probably because the Keep Alive has expired
-                    # We should be safe to retry, as ClickHouse should not have processed anything on a connection
+                    # We should be safe to retry, as Timeplus should not have processed anything on a connection
                     # that it killed.  We also only retry this once, as multiple disconnects are unlikely to be
                     # related to the Keep Alive settings
                     if attempts == 1:
