@@ -1,7 +1,5 @@
 from os import environ
 
-# pylint: disable=no-member
-import jwt
 import pytest
 
 from timeplus_connect.driver import create_client, ProgrammingError, create_async_client
