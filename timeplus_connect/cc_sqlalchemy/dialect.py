@@ -1,7 +1,6 @@
 
 from sqlalchemy import text
 from sqlalchemy.engine.default import DefaultDialect
-from sqlalchemy.sql import text
 
 from timeplus_connect import dbapi
 
