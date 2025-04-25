@@ -18,8 +18,8 @@ def test_variant(test_client: Client, table_context: Callable):
     type_available(test_client, 'variant')
     with table_context('basic_variants', [
         'key int32',
-        'v1 Variant(uint64, string, array(uint64), )',
-        'v2 Variant(ipv4, Decimal(10, 2))']):
+        'v1 variant(uint64, string, array(uint64), )',
+        'v2 variant(ipv4, decimal(10, 2))']):
         data = [[1, 58322, None],
                 [2, 'a string', 55.2],
                 [3, 'bef56f14-0870-4f82-a35e-9a47eff45a5b', 777.25],
@@ -37,9 +37,9 @@ def test_nested_variant(test_client: Client, table_context: Callable):
     type_available(test_client, 'variant')
     with table_context('nested_variants', [
         'key int32',
-        'm1 map(string, Variant(string, uint128, Bool))',
-        't1 tuple(int64, Variant(Bool, string, int32))',
-        'a1 array(array(Variant(string, DateTime, float64)))',
+        'm1 map(string, variant(string, uint128, bool))',
+        't1 tuple(int64, variant(bool, string, int32))',
+        'a1 array(array(variant(string, datetime, float64)))',
     ]):
         data = [[1,
                  {'k1': 'string1', 'k2': 34782477743, 'k3':True},
@@ -64,7 +64,7 @@ def test_nested_variant(test_client: Client, table_context: Callable):
 def test_dynamic_nested(test_client: Client, table_context: Callable):
     type_available(test_client, 'dynamic')
     with table_context('nested_dynamics', [
-        'm2 map(string, Dynamic)'
+        'm2 map(string, dynamic)'
         ], order_by='()'):
         data = [({'k4': 'string8', 'k5': 5000},)]
         test_client.insert('nested_dynamics', data)
@@ -76,8 +76,8 @@ def test_dynamic(test_client: Client, table_context: Callable):
     type_available(test_client, 'dynamic')
     with table_context('basic_dynamic', [
         'key uint64',
-        'v1 Dynamic',
-        'v2 Dynamic']):
+        'v1 dynamic',
+        'v2 dynamic']):
         data = [[1, 58322, 15.5],
                 [3, 'bef56f14-0870-4f82-a35e-9a47eff45a5b', 777.25],
                 [2, 'a string', 55.2],
@@ -94,8 +94,8 @@ def test_basic_json(test_client: Client, table_context: Callable):
     type_available(test_client, 'json')
     with table_context('new_json_basic', [
         'key int32',
-        'value JSON',
-        "null_value JSON"
+        'value json',
+        "null_value json"
     ]):
         jv3 = {'key3': 752, 'value.2': 'v2_rules', 'blank': None}
         jv1 = {'key1': 337, 'value.2': 'vvvv', 'HKD@spéçiäl': 'Special K', 'blank': 'not_really_blank'}
@@ -122,7 +122,7 @@ def test_basic_json(test_client: Client, table_context: Callable):
         null_json3 = result[2][2]
         assert null_json3['nk2']['space key'] == 'spacey'
 
-        set_write_format('JSON', 'string')
+        set_write_format('json', 'string')
         test_client.insert('new_json_basic', [[999, '{"key4": 283, "value.2": "str_value"}', '{"nk1":53}']])
         result = test_client.query('SELECT value.key4, null_value.nk1 FROM new_json_basic ORDER BY key').result_set
         assert result[3][0] == 283
@@ -133,7 +133,7 @@ def test_typed_json(test_client: Client, table_context: Callable):
     type_available(test_client, 'json')
     with table_context('new_json_typed', [
         'key int32',
-        'value JSON(max_dynamic_paths=150, `a.b` DateTime64(3), SKIP a.c)'
+        'value json(max_dynamic_paths=150, `a.b` datetime64(3), SKIP a.c)'
     ]):
         v1 = '{"a":{"b":"2020-10-15T10:15:44.877", "c":"skip_me"}}'
         test_client.insert('new_json_typed', [[1, v1]])
@@ -148,7 +148,7 @@ def test_complex_json(test_client: Client, table_context: Callable):
         pytest.skip('Complex JSON broken before 24.10')
     with table_context('new_json_complex', [
         'key int32',
-        'value tuple(t JSON)'
+        'value tuple(t json)'
         ]):
         data = [[100, ({'a': 'qwe123', 'b': 'main', 'c': None},)]]
         test_client.insert('new_json_complex', data)
@@ -158,11 +158,11 @@ def test_complex_json(test_client: Client, table_context: Callable):
 
 
 def test_json_str_time(test_client: Client):
-    if not test_client.min_version('25.1'):
-        pytest.skip('JSON string/numbers bug before 25.1, skipping')
-    result = test_client.query("SELECT '{\"timerange\": \"2025-01-01T00:00:00+0000\"}'::JSON").result_set
+    if not test_client.min_version('2.9'):
+        pytest.skip('JSON string/numbers bug before 2.9, skipping')
+    result = test_client.query("SELECT '{\"timerange\": \"2025-01-01T00:00:00+0000\"}'::json").result_set
     assert result[0][0]['timerange'] == datetime.datetime(2025, 1, 1)
 
     # The following query is broken -- looks like something to do with Nullable(String) in the Tuple
-    # result = test_client.query("SELECT'{\"k\": [123, \"xyz\"]}'::JSON",
+    # result = test_client.query("SELECT'{\"k\": [123, \"xyz\"]}'::json",
     #                           settings={'input_format_json_read_numbers_as_strings': 0}).result_set
