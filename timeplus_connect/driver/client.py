@@ -19,6 +19,7 @@ from timeplus_connect.driver.constants import CH_VERSION_WITH_PROTOCOL, PROTOCOL
 from timeplus_connect.driver.exceptions import ProgrammingError, OperationalError
 from timeplus_connect.driver.external import ExternalData
 from timeplus_connect.driver.insert import InsertContext
+from timeplus_connect.driver.options import check_arrow, check_pandas, check_numpy
 from timeplus_connect.driver.summary import QuerySummary
 from timeplus_connect.driver.models import ColumnDef, SettingDef, SettingStatus
 from timeplus_connect.driver.query import QueryResult, to_arrow, to_arrow_batches, QueryContext, arrow_buffer
