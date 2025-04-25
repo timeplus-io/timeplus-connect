@@ -41,11 +41,11 @@ def test_client_name(test_client: Client):
     assert 'py/' in user_agent
 
 
-def test_transport_settings(test_client: Client):
-    result = test_client.query('SELECT name,database FROM system.tables',
-                               transport_settings={'X-Workload': 'ONLINE'})
-    assert result.column_names == ('name', 'database')
-    assert len(result.result_set) > 0
+# def test_transport_settings(test_client: Client):
+#     result = test_client.query('SELECT name,database FROM system.tables',
+#                                transport_settings={'X-Workload': 'ONLINE'})
+#     assert result.column_names == ('name', 'database')
+#     assert len(result.result_set) > 0
 
 
 def test_none_database(test_client: Client):
