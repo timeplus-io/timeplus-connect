@@ -33,6 +33,11 @@ class TimeplusDialect(DefaultDialect):
     ischema_names = ischema_names
     inspector = TpInspector
 
+    # pylint: disable=method-hidden
+    @classmethod
+    def dbapi(cls):
+        return dbapi
+
     @classmethod
     def import_dbapi(cls):
         return dbapi
