@@ -220,7 +220,7 @@ class Client(ABC):
         :return: QueryResult -- data and metadata from response
         """
         if query and query.lower().strip().startswith('select __connect_version__'):
-            return QueryResult([[f'ClickHouse Connect v.{version()}  ⓒ ClickHouse Inc.']], None,
+            return QueryResult([[f'Timeplus Connect v.{version()}  ⓒ Timeplus Inc.']], None,
                                ('connect_version',), (get_from_name('string'),))
         kwargs = locals().copy()
         del kwargs['self']

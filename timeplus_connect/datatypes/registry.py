@@ -38,9 +38,9 @@ def parse_name(name: str) -> Tuple[str, str, TypeDef]:
     elif base.startswith('variant'):
         keys, values = parse_columns(base[7:])
         base = 'variant'
-    elif base.startswith('JSON') and len(base) > 4 and base[4] == '(':
+    elif base.startswith('json') and len(base) > 4 and base[4] == '(':
         keys, values = parse_columns(base[4:])
-        base = 'JSON'
+        base = 'json'
     # timeplusd doesn't support geometric type.
     # elif base == 'Point':
     #     values = ('Float64', 'Float64')

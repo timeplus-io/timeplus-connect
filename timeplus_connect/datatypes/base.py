@@ -356,7 +356,7 @@ class ArrayType(TimeplusType, ABC, registered=False):
 
 class UnsupportedType(TimeplusType, ABC, registered=False):
     """
-    Base class for ClickHouse types that can't be serialized/deserialized into Python types.
+    Base class for Timeplus types that can't be serialized/deserialized into Python types.
     Mostly useful just for DDL statements
     """
     def __init__(self, type_def: TypeDef):
