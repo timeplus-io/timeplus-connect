@@ -1,8 +1,12 @@
 # ClickHouse Connect ChangeLog
 
+### WARNING -- Breaking change for AsyncClient close()
+The AsyncClient close() method is now async and should be called as an async function.
+
 ### WARNING -- Python 3.8 EOL
 Python 3.8 was EOL on 2024-10-07.  It is no longer tested, and versions after 2025-04-07 will not include Python
-3.8 wheel distributions.
+3.8 wheel distributions.  As of version 0.8.15, wheels are not built for Python 3.8 AARCH64 versions due to
+missing dependencies in the build chain.
 
 ### WARNING -- JSON Incompatibility between versions 22.8 and 22.10
 The internal serialization format for experimental JSON was updated in ClickHouse version 24.10.  `clickhouse-connect`
@@ -16,6 +20,47 @@ converts any unrecognized keyword argument/query parameter to a ClickHouse serve
 release (0.9.0), unrecognized arguments/keywords for these methods of creating a DBAPI connection will raise an exception
 instead of being passed as ClickHouse server settings. This is in conjunction with some refactoring in Client construction.
 The supported method of passing ClickHouse server settings is to prefix such arguments/query parameters with`ch_`.
+
+## 0.8.17, 2025-04-10
+
+### Improvements
+- The parameter `transport_settings` has been added to the Client query and insert methods.  For the HTTP client (currently
+the only  option), this dictionary of string is directly translated into additional HTTP headers at a query level.  This can
+be used to provide additional proxy directives or other extra 'non-ClickHouse' information that is passed via headers.
+Thanks to [Paweł Szczur](https://github.com/orian) of PostHog for the original PR!
+- There was previously no way to add a path to the ClickHouse server host in cases where the ClickHouse server was
+behind a proxy that used path based routing (such as `https://big_proxy:8080/clickhouse).  The new `proxy_path`
+`get_client` argument can now be used to set that path.  Closes https://github.com/ClickHouse/clickhouse-connect/issues/486
+
+### Bug Fix
+- Version 0.8.16 introduced a bug where changing a Client setting value and then changing that setting value back to the
+  original server value would fail to restore the original setting.  This has been fixed.  Closes
+  https://github.com/ClickHouse/clickhouse-connect/issues/487
+
+## 0.8.16, 2025-03-28
+### Bug Fixes
+- Don't send a setting value if the setting is already correct according to the `system.settings` table. 
+Closes https://github.com/ClickHouse/clickhouse-connect/issues/469
+- Ensure that the http `user_agent` header is in ascii.  Note this could lead to an incorrectly encoded `os_user` if the
+os_user is not an Ascii string.  Closes https://github.com/ClickHouse/clickhouse-connect/issues/484
+- Fix "cannot access local variable" exception where the http client encounters an unexpected streaming error.  Also
+log that unexpected streaming error to assist debugging.  Closes https://github.com/ClickHouse/clickhouse-connect/issues/483
+- Check that arrow/pandas is installed when calling `query_df` and `query_arrow` and raise a more meaningful exception
+if the required library is absent.  Closes https://github.com/ClickHouse/clickhouse-connect/issues/477
+
+### Improvements
+- Some typing hints have been corrected.  Thanks to [Avery Fischer](https://github.com/biggerfisch) for the PR!
+- The docker based tests have been fixed to work with security improvements in recent ClickHouse releases
+- Query string cleanup is now (in theory) microseconds faster.  Thanks to [Sviatoslav Bobryshev](https://github.com/sbobryshev)
+for the optimization
+
+## 0.8.15, 2025-01-25
+### Bug Fix
+- The async client was not shutting down its associated executor thread pool, result in a memory leak if multiple
+async clients were created.  Closes https://github.com/ClickHouse/clickhouse-connect/issues/424.  Note that the `close`
+function for the async client is now async to cleanly close down the pool.  The recommended way to use an async client
+is now within an AsyncContext.  See the associated [PR](https://github.com/ClickHouse/clickhouse-connect/pull/457) for details.
+Thanks to ClickHouse core developer @pufit for the fix!  
 
 ## 0.8.14, 2025-01-13
 ### Bug Fix

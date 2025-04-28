@@ -41,6 +41,13 @@ def test_client_name(test_client: Client):
     assert 'py/' in user_agent
 
 
+# def test_transport_settings(test_client: Client):
+#     result = test_client.query('SELECT name,database FROM system.tables',
+#                                transport_settings={'X-Workload': 'ONLINE'})
+#     assert result.column_names == ('name', 'database')
+#     assert len(result.result_set) > 0
+
+
 def test_none_database(test_client: Client):
     old_db = test_client.database
     test_db = test_client.command('select current_database()')
@@ -174,8 +181,10 @@ def test_error_decode(test_client: Client):
 
 
 def test_command_as_query(test_client: Client):
+    # Test that non-SELECT and non-INSERT statements are treated as commands and
+    # just return the QueryResult metadata
     result = test_client.query("SET count_distinct_implementation = 'uniq'")
-    assert result.first_item['written_rows'] == 0
+    assert 'query_id' in result.first_item
 
 
 def test_show_create(test_client: Client):
